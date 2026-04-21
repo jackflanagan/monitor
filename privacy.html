@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0a0a0a">
+<title>Privacy Policy — Moist</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Cabinet+Grotesk:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --green: #5aff7e;
+    --bg: #0a0a0a;
+    --surface: #141414;
+    --border: rgba(255,255,255,0.07);
+    --text: #f0f0f0;
+    --muted: #666;
+    --font-head: 'Cabinet Grotesk', sans-serif;
+    --font-mono: 'DM Mono', monospace;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: var(--font-head); line-height: 1.7; }
+  .wrap { max-width: 680px; margin: 0 auto; padding: 60px 28px 80px; }
+  .nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 64px; }
+  .logo { font-size: 20px; font-weight: 800; letter-spacing: -0.02em; text-decoration: none; color: var(--text); }
+  .logo span { color: var(--green); }
+  .back { font-size: 13px; color: var(--muted); text-decoration: none; font-family: var(--font-mono); transition: color 0.2s; }
+  .back:hover { color: var(--text); }
+  .tag { display: inline-block; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--green); font-family: var(--font-mono); margin-bottom: 16px; }
+  h1 { font-size: 36px; font-weight: 800; letter-spacing: -0.03em; line-height: 1.1; margin-bottom: 12px; }
+  .updated { font-size: 13px; color: var(--muted); font-family: var(--font-mono); margin-bottom: 48px; }
+  h2 { font-size: 18px; font-weight: 700; letter-spacing: -0.01em; margin: 40px 0 12px; }
+  p { font-size: 15px; color: #b0b0b0; margin-bottom: 16px; }
+  ul { margin: 0 0 16px 20px; }
+  li { font-size: 15px; color: #b0b0b0; margin-bottom: 8px; }
+  .highlight { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px 24px; margin: 24px 0; }
+  .highlight p { margin: 0; color: var(--text); }
+  a { color: var(--green); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  .divider { height: 1px; background: var(--border); margin: 40px 0; }
+  .footer { font-size: 13px; color: var(--muted); font-family: var(--font-mono); margin-top: 48px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <nav class="nav">
+    <a class="logo" href="/">Moi<span>st</span></a>
+    <a class="back" href="/">← Back to app</a>
+  </nav>
+
+  <div class="tag">Legal</div>
+  <h1>Privacy Policy</h1>
+  <p class="updated">Last updated: April 2026</p>
+
+  <div class="highlight">
+    <p>The short version: Moist collects only what's needed to make the app work. We don't sell your data, show you ads, or share your information with third parties.</p>
+  </div>
+
+  <h2>What we collect</h2>
+  <p>Moist collects the following information when you use the app:</p>
+  <ul>
+    <li>Your email address, used to create and identify your account</li>
+    <li>Soil moisture readings from your ESP32 device, including moisture percentage, raw sensor values, and timestamps</li>
+    <li>Your device ID, used to link your sensor to your account</li>
+    <li>Push notification subscription tokens, used to send you watering alerts</li>
+  </ul>
+  <p>If you sign in with Google, we receive your name and email address from Google. We do not receive your Google password.</p>
+
+  <h2>How we use your data</h2>
+  <p>We use the information we collect solely to provide the Moist service:</p>
+  <ul>
+    <li>To display your soil moisture readings in the app</li>
+    <li>To send you push notifications when your plant needs watering</li>
+    <li>To identify your account and keep your data secure</li>
+  </ul>
+  <p>We do not use your data for advertising, analytics, or any purpose beyond operating the app.</p>
+
+  <div class="divider"></div>
+
+  <h2>Data storage</h2>
+  <p>Your data is stored securely using <a href="https://supabase.com" target="_blank">Supabase</a>, a hosted database platform. Data is stored in the EU West region. Supabase is SOC 2 compliant and encrypts data at rest and in transit.</p>
+  <p>Sensor readings are retained indefinitely so you can view your history. You can delete your account and all associated data at any time by contacting us.</p>
+
+  <h2>Data sharing</h2>
+  <p>We do not sell, rent, or share your personal data with any third parties, except as required by law.</p>
+  <p>The only third-party services we use are:</p>
+  <ul>
+    <li><strong>Supabase</strong> — database and authentication hosting</li>
+    <li><strong>Google OAuth</strong> — optional sign-in via Google account</li>
+    <li><strong>Web Push (FCM)</strong> — delivery of push notifications via your browser or device</li>
+  </ul>
+
+  <h2>Your rights</h2>
+  <p>You have the right to:</p>
+  <ul>
+    <li>Access the data we hold about you</li>
+    <li>Request correction of inaccurate data</li>
+    <li>Request deletion of your account and all associated data</li>
+    <li>Withdraw consent for push notifications at any time via your device settings</li>
+  </ul>
+  <p>To exercise any of these rights, contact us at the email address below.</p>
+
+  <h2>Children's privacy</h2>
+  <p>Moist is not directed at children under 13. We do not knowingly collect personal information from children under 13.</p>
+
+  <h2>Changes to this policy</h2>
+  <p>We may update this privacy policy from time to time. We will notify users of significant changes via the app or by email. The date at the top of this page reflects the most recent update.</p>
+
+  <div class="divider"></div>
+
+  <h2>Contact</h2>
+  <p>If you have any questions about this privacy policy or your data, contact us at:</p>
+  <p><a href="mailto:admin@plantmoist.com">admin@plantmoist.com</a></p>
+
+  <p class="footer">© 2026 Moist · <a href="/">plantmoist.com</a></p>
+</div>
+</body>
+</html>
