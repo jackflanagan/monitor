@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -458,7 +459,7 @@ async function startDeviceSearch() {
 }
 
 async function pollForDevice() {
-  if (!currentUser) return;
+  if (!currentUser) { console.log('Poll: no user yet'); return; }
   var { data, error } = await sb
     .from('pending_devices')
     .select('device_id, created_at')
@@ -466,12 +467,12 @@ async function pollForDevice() {
     .limit(1);
 
   console.log('Poll result:', data, error);
-
-  if (error || !data || !data.length) return;
+  if (error || !data || !data.length) { console.log('Poll: no data'); return; }
 
   var device = data[0];
   var age = (Date.now() - new Date(device.created_at).getTime()) / 1000;
-  if (age > 600) return; // ignore devices older than 10 minutes
+  console.log('Device age (seconds):', age, 'device_id:', device.device_id);
+  if (age > 600) { console.log('Poll: device too old'); return; }
 
   scannedDeviceId = device.device_id;
   stopDeviceSearch();
