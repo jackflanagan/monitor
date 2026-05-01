@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -472,7 +471,7 @@ async function pollForDevice() {
 
   var device = data[0];
   var age = (Date.now() - new Date(device.created_at).getTime()) / 1000;
-  if (age > 120) return;
+  if (age > 600) return; // ignore devices older than 10 minutes
 
   scannedDeviceId = device.device_id;
   stopDeviceSearch();
