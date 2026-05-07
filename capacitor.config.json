@@ -1,0 +1,14 @@
+{
+  "appId": "com.plantmoist.app",
+  "appName": "Moist",
+  "webDir": ".",
+  "server": {
+    "url": "https://plantmoist.com",
+    "cleartext": false,
+    "androidScheme": "https"
+  },
+  "android": {
+    "allowMixedContent": false,
+    "backgroundColor": "#0a0a0a"
+  }
+}

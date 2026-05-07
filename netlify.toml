@@ -1,0 +1,24 @@
+[build]
+  publish = "."
+
+# Service worker must not be cached — browsers need the latest version always
+[[headers]]
+  for = "/sw.js"
+  [headers.values]
+    Cache-Control = "no-cache, no-store, must-revalidate"
+    Service-Worker-Allowed = "/"
+
+# All other pages — disable CSP so Supabase / Google OAuth fetch calls are never blocked
+[[headers]]
+  for = "/*"
+  [headers.values]
+    Content-Security-Policy = "default-src * 'unsafe-inline' 'unsafe-eval' data: blob:;"
+    X-Frame-Options = "SAMEORIGIN"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+
+# Serve privacy policy without extension
+[[redirects]]
+  from = "/privacy"
+  to   = "/privacy.html"
+  status = 200
