@@ -5,7 +5,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#0a0a0a">
-<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
 <meta name="apple-mobile-web-app-title" content="Moist">
 <title>Moist — Soil Monitor</title>
@@ -301,8 +301,19 @@ function showScreen(name){
 
 async function init(){
   var {data:{session}}=await sb.auth.getSession();
-  if(session){currentUser=session.user;await loadDashboard();}
-  else showScreen('login');
+  if(session){
+    currentUser=session.user;
+    await loadDashboard();
+  } else {
+    // Wait for any in-flight OAuth redirect session to settle
+    var resolved=await new Promise(function(resolve){
+      var unsub=sb.auth.onAuthStateChange(function(event,s){
+        if(event==='INITIAL_SESSION'){unsub.data.subscription.unsubscribe();resolve(s);}
+      });
+    });
+    if(resolved){currentUser=resolved.user;await loadDashboard();}
+    else showScreen('login');
+  }
 }
 
 async function doLogin(){
@@ -333,10 +344,9 @@ async function doGoogle(){
 }
 
 async function doSignOut(){
-  await sb.auth.signOut();
-  currentUser=null;userDevices=[];
   if(refreshTimer)clearInterval(refreshTimer);
-  showScreen('login');
+  await sb.auth.signOut();
+  window.location.href='/';
 }
 
 sb.auth.onAuthStateChange(async function(event,session){
@@ -355,8 +365,11 @@ async function loadDashboard(){
 }
 
 async function loadDevices(){
-  var {data,error}=await sb.from('devices').select('*').order('created_at');
-  if(!error&&data)userDevices=data;
+  for(var attempt=0;attempt<3;attempt++){
+    var {data,error}=await sb.from('devices').select('*').order('created_at');
+    if(!error&&data){userDevices=data;if(data.length>0)return;}
+    if(attempt<2)await new Promise(function(r){setTimeout(r,1000);});
+  }
 }
 
 async function deleteDevice(deviceId){
