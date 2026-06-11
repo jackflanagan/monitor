@@ -337,6 +337,10 @@ async function doGoogle(){
 
 function doSignOut(){
   if(refreshTimer)clearInterval(refreshTimer);
+  // Clear session from localStorage immediately so the reload sees no session
+  Object.keys(localStorage).forEach(function(k){
+    if(k.startsWith('sb-'))localStorage.removeItem(k);
+  });
   sb.auth.signOut().catch(function(){});
   window.location.href='/';
 }
