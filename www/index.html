@@ -129,6 +129,48 @@
   .loading-dot:nth-child(2){animation-delay:0.15s}
   .loading-dot:nth-child(3){animation-delay:0.3s}
   @keyframes ldot{0%,80%,100%{opacity:0.2;transform:scale(0.8)}40%{opacity:1;transform:scale(1)}}
+
+  /* WiFi Setup */
+  .setup-steps{display:flex;flex-direction:column;gap:12px;margin-bottom:28px}
+  .setup-step{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:18px;display:flex;gap:14px;align-items:flex-start}
+  .setup-step-num{width:28px;height:28px;border-radius:50%;background:var(--green-dim);color:var(--green);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:12px;flex-shrink:0;font-family:var(--font-mono)}
+  .setup-step-text{font-size:13px;line-height:1.7;color:#b0b0b0}
+  .setup-step-text strong{color:var(--text);display:block;margin-bottom:3px;font-size:14px}
+  .setup-link{color:var(--green);text-decoration:underline;cursor:pointer;font-family:var(--font-mono)}
+
+  /* Onboarding */
+  .onboard-wrap{min-height:100vh;display:flex;flex-direction:column;padding:52px 28px 40px}
+  .onboard-skip{background:none;border:none;color:var(--muted);font-family:var(--font-head);font-size:14px;cursor:pointer;padding:0;align-self:flex-end;margin-bottom:32px}
+  .onboard-slides-outer{overflow:hidden;flex:1;display:flex;flex-direction:column}
+  .onboard-slides{display:flex;transition:transform 0.4s cubic-bezier(0.4,0,0.2,1);will-change:transform;flex:1}
+  .onboard-slide{min-width:100%;display:flex;flex-direction:column;justify-content:center;padding-right:16px}
+  .onboard-icon{font-size:56px;margin-bottom:24px}
+  .onboard-title{font-size:26px;font-weight:800;letter-spacing:-0.03em;margin-bottom:12px}
+  .onboard-body{font-size:15px;color:var(--muted);line-height:1.65}
+  .onboard-dots{display:flex;gap:6px;margin-top:36px}
+  .onboard-dot{width:6px;height:6px;border-radius:50%;background:var(--border);transition:all 0.3s}
+  .onboard-dot.active{background:var(--green);width:18px;border-radius:3px}
+  .onboard-nav{display:flex;justify-content:flex-end;margin-top:20px}
+  .onboard-next{background:var(--green);color:#000;border:none;border-radius:14px;padding:14px 28px;font-family:var(--font-head);font-size:15px;font-weight:800;cursor:pointer;transition:opacity 0.2s}
+  .onboard-next:hover{opacity:0.9}
+
+  /* Calibration */
+  .calibrate-wrap{padding:60px 28px 40px}
+  .calibrate-section{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:20px;margin-bottom:12px}
+  .calibrate-label{font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);font-family:var(--font-mono);margin-bottom:6px}
+  .calibrate-value{font-size:30px;font-weight:800;letter-spacing:-0.03em;margin-bottom:14px}
+  .calibrate-value span{font-size:13px;font-weight:400;color:var(--muted)}
+  .calibrate-btn{width:100%;padding:13px;background:var(--surface2);border:1px solid var(--border);border-radius:12px;color:var(--text);font-family:var(--font-head);font-size:14px;font-weight:700;cursor:pointer;transition:all 0.2s;text-align:left}
+  .calibrate-btn:hover{border-color:rgba(255,255,255,0.2)}
+  .calibrate-btn:active{transform:scale(0.98)}
+
+  /* Banners */
+  .banner{margin:0 16px 10px;border-radius:14px;padding:12px 16px;display:none;align-items:center;gap:10px;font-size:13px;font-family:var(--font-mono)}
+  .banner.show{display:flex}
+  .banner-offline{background:var(--amber-dim);border:1px solid rgba(255,184,48,0.25);color:var(--amber)}
+  .banner-calibrate{background:var(--blue-dim);border:1px solid rgba(74,173,255,0.25);color:var(--blue)}
+  .banner svg{width:15px;height:15px;flex-shrink:0}
+  .banner-action{background:none;border:none;color:inherit;font-family:var(--font-mono);font-size:12px;text-decoration:underline;cursor:pointer;margin-left:auto;white-space:nowrap;padding:0}
 </style>
 </head>
 <body>
@@ -238,6 +280,17 @@
       </div>
     </div>
 
+    <div class="banner banner-offline" id="banner-offline">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="1" y1="1" x2="23" y2="23"/><path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55"/><path d="M5 12.55a10.94 10.94 0 0 1 5.17-2.39"/><path d="M10.71 5.05A16 16 0 0 1 22.56 9"/><path d="M1.42 9a15.91 15.91 0 0 1 4.7-2.88"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/></svg>
+      <span id="banner-offline-text">Device offline</span>
+      <button class="banner-action" onclick="fetchReadings()">Retry</button>
+    </div>
+    <div class="banner banner-calibrate" id="banner-calibrate">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      <span>Calibrate for accurate readings</span>
+      <button class="banner-action" onclick="openCalibration()">Calibrate</button>
+    </div>
+
     <div class="gauge-card" id="gauge-card">
       <div class="gauge-wrap">
         <svg viewBox="0 0 200 115" xmlns="http://www.w3.org/2000/svg">
@@ -285,6 +338,95 @@
   </div>
 </div>
 
+<div id="screen-wifi-setup" class="screen">
+  <div class="auth-wrap">
+    <div class="auth-logo">Moi<span>st</span></div>
+    <div class="auth-tagline">soil moisture · anywhere</div>
+    <div class="auth-title" style="margin-bottom:6px">Set up your device</div>
+    <div class="auth-sub" style="margin-bottom:28px">Follow these steps to get your ESP32 online</div>
+    <div class="setup-steps">
+      <div class="setup-step">
+        <div class="setup-step-num">1</div>
+        <div class="setup-step-text"><strong>Plug in your ESP32</strong>Connect it to power and wait for the LED to blink slowly</div>
+      </div>
+      <div class="setup-step">
+        <div class="setup-step-num">2</div>
+        <div class="setup-step-text"><strong>Join the setup hotspot</strong>On your phone go to WiFi settings and connect to <span class="setup-link" style="cursor:default">Moist Setup</span> — password: <span class="setup-link" style="cursor:default">moistplant</span></div>
+      </div>
+      <div class="setup-step">
+        <div class="setup-step-num">3</div>
+        <div class="setup-step-text"><strong>Open the config page</strong>Tap <span class="setup-link" onclick="openDeviceConfig()">192.168.4.1</span> to enter your home WiFi details</div>
+      </div>
+    </div>
+    <button class="btn-primary" onclick="completeWifiSetup()">Done — device is connected</button>
+    <div style="text-align:center;margin-top:20px"><button style="background:none;border:none;color:var(--muted);font-family:var(--font-head);font-size:13px;cursor:pointer" onclick="completeWifiSetup()">Skip for now</button></div>
+  </div>
+</div>
+
+<div id="screen-onboarding" class="screen">
+  <div class="onboard-wrap">
+    <button class="onboard-skip" onclick="completeOnboarding()">Skip</button>
+    <div class="onboard-slides-outer">
+      <div class="onboard-slides" id="onboard-slides">
+        <div class="onboard-slide">
+          <div class="onboard-icon">🌿</div>
+          <div class="onboard-title">Welcome to Moist</div>
+          <div class="onboard-body">Monitor your plants' soil moisture from anywhere, in real time.</div>
+        </div>
+        <div class="onboard-slide">
+          <div class="onboard-icon">📡</div>
+          <div class="onboard-title">How it works</div>
+          <div class="onboard-body">Your ESP32 reads soil moisture every 10 seconds and sends it to the cloud. You get instant updates, anywhere.</div>
+        </div>
+        <div class="onboard-slide">
+          <div class="onboard-icon">🔌</div>
+          <div class="onboard-title">Device setup</div>
+          <div class="onboard-body">Plug in your ESP32, join the Moist Setup hotspot, and enter your home WiFi. Takes about 2 minutes.</div>
+        </div>
+        <div class="onboard-slide">
+          <div class="onboard-icon">✅</div>
+          <div class="onboard-title">You're all set!</div>
+          <div class="onboard-body">Check your email to confirm your account, then sign in and add your first device.</div>
+        </div>
+      </div>
+      <div class="onboard-dots" id="onboard-dots">
+        <div class="onboard-dot active"></div>
+        <div class="onboard-dot"></div>
+        <div class="onboard-dot"></div>
+        <div class="onboard-dot"></div>
+      </div>
+      <div class="onboard-nav">
+        <button class="onboard-next" id="onboard-next-btn" onclick="onboardNext()">Next</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="screen-calibrate" class="screen">
+  <div class="calibrate-wrap">
+    <button class="back-btn" onclick="showScreen('dashboard')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+      Back
+    </button>
+    <div class="auth-title" style="margin-bottom:6px">Calibrate</div>
+    <div class="auth-sub" style="margin-bottom:24px" id="calibrate-device-label">Calibrating device</div>
+    <div class="calibrate-section">
+      <div class="calibrate-label">Dry threshold (ADC)</div>
+      <div class="calibrate-value" id="cal-dry-val">— <span>not set</span></div>
+      <button class="calibrate-btn" onclick="doCalibrate('dry')">📍 Place sensor in dry soil, then tap</button>
+    </div>
+    <div class="calibrate-section">
+      <div class="calibrate-label">Wet threshold (ADC)</div>
+      <div class="calibrate-value" id="cal-wet-val">— <span>not set</span></div>
+      <button class="calibrate-btn" onclick="doCalibrate('wet')">💧 Submerge sensor in water, then tap</button>
+    </div>
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px">
+      <div style="font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);font-family:var(--font-mono);margin-bottom:8px">Live reading</div>
+      <div style="font-family:var(--font-mono);font-size:16px;color:var(--text)">Raw ADC: <span id="cal-current-adc">—</span></div>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -292,6 +434,7 @@ var SUPABASE_URL='https://usoirglmgylpyokmusez.supabase.co';
 var SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVzb2lyZ2xtZ3lscHlva211c2V6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY3NDY1MTgsImV4cCI6MjA5MjMyMjUxOH0.MOtJbBJP3WpqD7EZFnrRGUM-zuR4nyR02qIF-FK4Ncg';
 var sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 var currentUser=null,userDevices=[],activeDeviceId=null,historyData=[],refreshTimer=null;
+var latestRawAdc=null,calibratingDeviceId=null,onboardSlide=0,lastReadingTime=null;
 
 function showScreen(name){
   document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active')});
@@ -304,6 +447,7 @@ function init(){
   sb.auth.onAuthStateChange(async function(event,session){
     if(event==='INITIAL_SESSION'||event==='SIGNED_IN'){
       if(session){currentUser=session.user;await loadDashboard();}
+      else if(!localStorage.getItem('moist_wifi_setup')){showScreen('wifi-setup');}
       else showScreen('login');
     }
   });
@@ -328,8 +472,8 @@ async function doSignup(){
   var {data,error}=await sb.auth.signUp({email,password});
   btn.disabled=false;btn.textContent='Create account';
   if(error){showAuthError('signup-error',error.message);return;}
-  showToast('Check your email to confirm your account',true);
-  showScreen('login');
+  if(!localStorage.getItem('moist_onboarded')){showOnboarding();}
+  else{showToast('Check your email to confirm your account',true);showScreen('login');}
 }
 
 async function doGoogle(){
@@ -355,7 +499,7 @@ async function loadDashboard(){
   activeDeviceId=(match||userDevices[0]).device_id;
   localStorage.setItem('moist_active_device',activeDeviceId);
   document.getElementById('active-plant-name').textContent=(match||userDevices[0]).plant_name||'My Plant';
-  renderDeviceList();fetchReadings();
+  renderDeviceList();fetchReadings();updateCalibrationBanner();
   if(refreshTimer)clearInterval(refreshTimer);
   refreshTimer=setInterval(fetchReadings,10000);
 }
@@ -393,7 +537,10 @@ function renderDeviceList(){
       +'<div class="device-name" style="color:'+(active?'var(--green)':'var(--text)')+'">'+( d.plant_name||'My Plant')+'</div>'
       +'<div class="device-id-label">'+d.device_id+'</div>'
       +'</div>'
+      +'<div style="display:flex;gap:4px">'
+      +'<button class="device-delete" style="color:var(--muted);font-size:15px" onclick="event.stopPropagation();openCalibration(\''+d.device_id+'\')" title="Calibrate">⚙</button>'
       +'<button class="device-delete" onclick="event.stopPropagation();deleteDevice(\''+d.device_id+'\')">×</button>'
+      +'</div>'
       +'</div>';
   }).join('');
 }
@@ -402,7 +549,7 @@ function selectDevice(deviceId,plantName){
   activeDeviceId=deviceId;
   localStorage.setItem('moist_active_device',deviceId);
   document.getElementById('active-plant-name').textContent=plantName;
-  renderDeviceList();fetchReadings();
+  renderDeviceList();fetchReadings();updateCalibrationBanner();
 }
 
 async function fetchReadings(){
@@ -414,9 +561,24 @@ async function fetchReadings(){
   if(error||!data||!data.length){
     document.getElementById('conn-dot').className='conn-dot error';
     document.getElementById('conn-label').textContent=error?'Connection failed':'No data yet';
+    if(lastReadingTime){
+      var minsAgo=Math.round((Date.now()-lastReadingTime)/60000);
+      if(minsAgo>=2){
+        document.getElementById('banner-offline-text').textContent='Device offline — last seen '+minsAgo+' min ago';
+        document.getElementById('banner-offline').classList.add('show');
+      }
+    }
     return;
   }
   var latest=data[0];
+  lastReadingTime=new Date(latest.created_at).getTime();
+  var minsOld=Math.round((Date.now()-lastReadingTime)/60000);
+  if(minsOld>=2){
+    document.getElementById('banner-offline-text').textContent='Device offline — last seen '+minsOld+' min ago';
+    document.getElementById('banner-offline').classList.add('show');
+  } else {
+    document.getElementById('banner-offline').classList.remove('show');
+  }
   updateGauge(latest.moisture,latest.raw_adc,latest.status);
   historyData=data.slice(0,12).reverse();
   renderBars();
@@ -427,6 +589,7 @@ async function fetchReadings(){
 }
 
 function updateGauge(moisture,raw,status){
+  latestRawAdc=raw;
   var color=colorFor(moisture);
   var arc=document.getElementById('gauge-arc');
   arc.style.strokeDashoffset=251-(moisture/100)*251;
@@ -550,7 +713,17 @@ async function enableNotifications(){
   } catch(e){
     btn.disabled=false;txt.textContent='Enable notifications';
     console.error('enableNotifications error:',e);
-    showToast('Error: '+e.message);
+    var msg;
+    if(e.name==='NotAllowedError'||Notification.permission==='denied'){
+      msg='Permission denied — enable notifications in browser settings';
+    } else if(e.name==='AbortError'||String(e.message).toLowerCase().includes('push service')){
+      msg='Push service error — try again later';
+    } else if(String(e.message).toLowerCase().includes('network')||String(e.message).toLowerCase().includes('fetch')){
+      msg='Network error — check your connection';
+    } else {
+      msg=e.message||'Could not enable notifications';
+    }
+    showToast(msg);
   }
 }
 
@@ -560,6 +733,68 @@ async function checkNotifStatus(){
     document.getElementById('notif-btn-text').textContent='Notifications on';
     document.getElementById('notif-btn').style.background='var(--green-dim)';
   }
+}
+
+// ── WiFi Setup ────────────────────────────────────────────────────────────────
+function openDeviceConfig(){
+  window.open('http://192.168.4.1','_blank');
+}
+function completeWifiSetup(){
+  localStorage.setItem('moist_wifi_setup','1');
+  showScreen('login');
+}
+
+// ── Onboarding ────────────────────────────────────────────────────────────────
+function showOnboarding(){
+  onboardSlide=0;
+  updateOnboardSlide();
+  showScreen('onboarding');
+}
+function updateOnboardSlide(){
+  document.getElementById('onboard-slides').style.transform='translateX(-'+onboardSlide+'00%)';
+  document.querySelectorAll('.onboard-dot').forEach(function(d,i){
+    d.className='onboard-dot'+(i===onboardSlide?' active':'');
+  });
+  document.getElementById('onboard-next-btn').textContent=onboardSlide===3?'Get started':'Next';
+}
+function onboardNext(){
+  if(onboardSlide<3){onboardSlide++;updateOnboardSlide();return;}
+  completeOnboarding();
+}
+function completeOnboarding(){
+  localStorage.setItem('moist_onboarded','1');
+  showToast('Check your email to confirm your account!',true);
+  showScreen('login');
+}
+
+// ── Calibration ───────────────────────────────────────────────────────────────
+function openCalibration(deviceId){
+  if(deviceId)activeDeviceId=deviceId;
+  var device=userDevices.find(function(d){return d.device_id===activeDeviceId;});
+  if(!device)return;
+  calibratingDeviceId=activeDeviceId;
+  document.getElementById('calibrate-device-label').textContent=(device.plant_name||device.device_id);
+  document.getElementById('cal-dry-val').innerHTML=device.dry_threshold!=null?device.dry_threshold+' <span>ADC</span>':'— <span>not set</span>';
+  document.getElementById('cal-wet-val').innerHTML=device.wet_threshold!=null?device.wet_threshold+' <span>ADC</span>':'— <span>not set</span>';
+  document.getElementById('cal-current-adc').textContent=latestRawAdc!=null?latestRawAdc:'—';
+  showScreen('calibrate');
+}
+async function doCalibrate(type){
+  if(latestRawAdc==null){showToast('No reading available yet — wait for a reading first');return;}
+  var field=type==='dry'?'dry_threshold':'wet_threshold';
+  var updateData={};updateData[field]=latestRawAdc;
+  var {error}=await sb.from('devices').update(updateData).eq('device_id',calibratingDeviceId).eq('user_id',currentUser.id);
+  if(error){showToast('Save failed: '+error.message);return;}
+  var device=userDevices.find(function(d){return d.device_id===calibratingDeviceId;});
+  if(device)device[field]=latestRawAdc;
+  document.getElementById('cal-'+(type==='dry'?'dry':'wet')+'-val').innerHTML=latestRawAdc+' <span>ADC</span>';
+  showToast(type==='dry'?'Dry threshold saved!':'Wet threshold saved!',true);
+  updateCalibrationBanner();
+}
+function updateCalibrationBanner(){
+  var device=userDevices.find(function(d){return d.device_id===activeDeviceId;});
+  var needs=!!(device&&(device.dry_threshold==null||device.wet_threshold==null));
+  document.getElementById('banner-calibrate').classList.toggle('show',needs);
 }
 
 init();

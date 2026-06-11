@@ -31,6 +31,8 @@ function makeMockLib({ session = null, devices = [], readings = [], loginError =
   var READINGS=${JSON.stringify(readings)};
   var LOGIN_ERROR=${JSON.stringify(loginError)};
   var KEY='${STORAGE_KEY}';
+  localStorage.setItem('moist_wifi_setup','1');
+  localStorage.setItem('moist_onboarded','1');
   function stored(){try{return JSON.parse(localStorage.getItem(KEY))}catch(e){return null}}
   function q(tbl){
     var o={};
