@@ -8,11 +8,14 @@
     Cache-Control = "no-cache, no-store, must-revalidate"
     Service-Worker-Allowed = "/"
 
-# All other pages — disable CSP so Supabase / Google OAuth fetch calls are never blocked
+# All other pages — disable CSP, allow all fetch/CORS
 [[headers]]
   for = "/*"
   [headers.values]
     Content-Security-Policy = "default-src * 'unsafe-inline' 'unsafe-eval' data: blob:;"
+    Access-Control-Allow-Origin = "*"
+    Access-Control-Allow-Methods = "GET, POST, PUT, PATCH, DELETE, OPTIONS"
+    Access-Control-Allow-Headers = "*"
     X-Frame-Options = "SAMEORIGIN"
     X-Content-Type-Options = "nosniff"
     Referrer-Policy = "strict-origin-when-cross-origin"

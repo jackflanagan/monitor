@@ -1,7 +1,7 @@
 {
   "appId": "com.plantmoist.app",
   "appName": "Moist",
-  "webDir": ".",
+  "webDir": "www",
   "server": {
     "url": "https://plantmoist.com",
     "cleartext": false,

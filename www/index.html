@@ -1,0 +1,559 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0a0a0a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="Moist">
+<title>Moist — Soil Monitor</title>
+<link rel="manifest" href="/manifest.json">
+<link rel="icon" type="image/svg+xml" href="/icon.svg">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Cabinet+Grotesk:wght@400;500;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  :root {
+    --green:#5aff7e;--green-dim:#1a3a22;--amber:#ffb830;--amber-dim:#3a2a0a;
+    --blue:#4aadff;--blue-dim:#0a1e3a;--bg:#0a0a0a;--surface:#141414;
+    --surface2:#1c1c1c;--border:rgba(255,255,255,0.07);--text:#f0f0f0;--muted:#666;
+    --font-head:'Cabinet Grotesk',sans-serif;--font-mono:'DM Mono',monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  body{background:var(--bg);color:var(--text);font-family:var(--font-head);min-height:100vh;overflow-x:hidden}
+  .screen{display:none;max-width:420px;margin:0 auto;min-height:100vh}
+  .screen.active{display:block}
+
+  /* Auth */
+  .auth-wrap{padding:60px 28px 40px;display:flex;flex-direction:column;min-height:100vh}
+  .auth-logo{font-size:32px;font-weight:800;letter-spacing:-0.03em;margin-bottom:8px}
+  .auth-logo span{color:var(--green)}
+  .auth-tagline{font-size:14px;color:var(--muted);font-family:var(--font-mono);margin-bottom:48px}
+  .auth-title{font-size:22px;font-weight:800;letter-spacing:-0.02em;margin-bottom:6px}
+  .auth-sub{font-size:13px;color:var(--muted);margin-bottom:28px}
+  .field{margin-bottom:14px}
+  .field label{display:block;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);font-family:var(--font-mono);margin-bottom:7px}
+  .field input{width:100%;padding:13px 14px;background:var(--surface);border:1px solid var(--border);border-radius:12px;color:var(--text);font-family:var(--font-mono);font-size:14px;outline:none;transition:border-color 0.2s}
+  .field input:focus{border-color:rgba(255,255,255,0.2)}
+  .btn-primary{width:100%;padding:15px;background:var(--green);color:#000;border:none;border-radius:14px;font-family:var(--font-head);font-size:15px;font-weight:800;cursor:pointer;transition:opacity 0.2s;letter-spacing:-0.01em;margin-top:4px}
+  .btn-primary:hover{opacity:0.9}
+  .btn-primary:disabled{opacity:0.4;cursor:not-allowed}
+  .divider{display:flex;align-items:center;gap:12px;margin:20px 0}
+  .divider-line{flex:1;height:1px;background:var(--border)}
+  .divider span{font-size:12px;color:var(--muted);font-family:var(--font-mono)}
+  .btn-google{width:100%;padding:13px;background:var(--surface);border:1px solid var(--border);border-radius:14px;color:var(--text);font-family:var(--font-head);font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;transition:border-color 0.2s}
+  .btn-google:hover{border-color:rgba(255,255,255,0.2)}
+  .btn-google svg{width:18px;height:18px;flex-shrink:0}
+  .auth-switch{text-align:center;margin-top:24px;font-size:13px;color:var(--muted)}
+  .auth-switch a{color:var(--green);text-decoration:none;font-weight:700;cursor:pointer}
+  .auth-error{background:#1c1010;border:1px solid #3a1a1a;color:#ff7a7a;padding:11px 14px;border-radius:10px;font-size:13px;font-family:var(--font-mono);margin-bottom:14px;display:none}
+  .auth-error.show{display:block}
+
+  /* Add device */
+  .add-device-wrap{padding:60px 28px 40px}
+  .back-btn{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);cursor:pointer;margin-bottom:32px;background:none;border:none;font-family:var(--font-head)}
+  .back-btn svg{width:16px;height:16px}
+  .device-id-hint{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:20px}
+  .hint-label{font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);font-family:var(--font-mono);margin-bottom:6px}
+  .hint-code{font-family:var(--font-mono);font-size:13px;color:var(--green)}
+
+  /* Dashboard */
+  .app-wrap{padding:0 0 40px}
+  .header{padding:52px 24px 20px;display:flex;justify-content:space-between;align-items:flex-start}
+  .header-title{font-size:11px;letter-spacing:0.12em;color:var(--muted);text-transform:uppercase;font-family:var(--font-mono);margin-bottom:4px}
+  .header-plant{font-size:22px;font-weight:800;letter-spacing:-0.02em}
+  .conn-indicator{display:flex;align-items:center;gap:6px;font-size:11px;font-family:var(--font-mono);color:var(--muted);margin-top:4px}
+  .conn-dot{width:6px;height:6px;border-radius:50%;background:var(--muted);transition:background 0.4s}
+  .conn-dot.live{background:var(--green);box-shadow:0 0 8px var(--green);animation:pulse 2s infinite}
+  .conn-dot.error{background:#ff4a4a}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
+  .header-btns{display:flex;gap:8px}
+  .icon-btn{width:36px;height:36px;border-radius:50%;border:1px solid var(--border);background:var(--surface);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--muted);transition:all 0.2s;flex-shrink:0}
+  .icon-btn:hover{border-color:rgba(255,255,255,0.2);color:var(--text)}
+  .icon-btn svg{width:16px;height:16px}
+
+  .gauge-card{margin:0 16px 16px;background:var(--surface);border:1px solid var(--border);border-radius:24px;padding:28px 24px 24px;display:flex;flex-direction:column;align-items:center;position:relative;overflow:hidden}
+  .gauge-card::before{content:'';position:absolute;top:-60px;left:50%;transform:translateX(-50%);width:200px;height:200px;border-radius:50%;background:radial-gradient(circle,rgba(90,255,126,0.06) 0%,transparent 70%);pointer-events:none;transition:background 0.6s}
+  .gauge-card.dry::before{background:radial-gradient(circle,rgba(255,184,48,0.08) 0%,transparent 70%)}
+  .gauge-card.wet::before{background:radial-gradient(circle,rgba(74,173,255,0.08) 0%,transparent 70%)}
+  .gauge-wrap{position:relative;width:200px;height:115px;margin-bottom:8px}
+  .gauge-wrap svg{width:200px;overflow:visible}
+  #gauge-arc{transition:stroke-dashoffset 0.8s cubic-bezier(0.34,1.56,0.64,1),stroke 0.6s}
+  .gauge-pct{position:absolute;bottom:-4px;width:100%;text-align:center;font-size:48px;font-weight:800;letter-spacing:-0.04em;transition:color 0.6s}
+  .status-pill{display:inline-flex;align-items:center;gap:7px;padding:7px 16px;border-radius:99px;font-size:13px;font-weight:500;font-family:var(--font-mono);margin-top:16px;transition:all 0.4s}
+  .pill-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+  .pill-ok{background:var(--green-dim);color:var(--green)}.pill-ok .pill-dot{background:var(--green)}
+  .pill-dry{background:var(--amber-dim);color:var(--amber)}.pill-dry .pill-dot{background:var(--amber)}
+  .pill-wet{background:var(--blue-dim);color:var(--blue)}.pill-wet .pill-dot{background:var(--blue)}
+
+  .metrics{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:0 16px 16px}
+  .metric{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:16px}
+  .metric-label{font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);font-family:var(--font-mono);margin-bottom:8px}
+  .metric-value{font-size:26px;font-weight:700;letter-spacing:-0.02em}
+  .metric-unit{font-size:13px;font-weight:400;color:var(--muted);margin-left:2px}
+
+  .history-card{margin:0 16px 16px;background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:20px}
+  .history-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+  .history-title{font-size:12px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);font-family:var(--font-mono)}
+  .bars{display:flex;align-items:flex-end;gap:5px;height:64px}
+  .bar{flex:1;border-radius:3px 3px 0 0;transition:height 0.5s cubic-bezier(0.34,1.56,0.64,1);min-height:3px}
+
+  .devices-card{margin:0 16px 16px;background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:20px}
+  .devices-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+  .devices-title{font-size:12px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);font-family:var(--font-mono)}
+  .add-device-btn{font-size:12px;color:var(--green);background:none;border:none;cursor:pointer;font-family:var(--font-mono);font-weight:500}
+  .device-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);cursor:pointer}
+  .device-row:last-child{border-bottom:none}
+  .device-info{display:flex;flex-direction:column;gap:3px}
+  .device-name{font-size:14px;font-weight:700}
+  .device-id-label{font-size:11px;color:var(--muted);font-family:var(--font-mono)}
+  .device-delete{background:none;border:none;color:var(--muted);cursor:pointer;padding:4px;font-size:18px;line-height:1}
+  .no-devices{font-size:13px;color:var(--muted);padding:8px 0;text-align:center}
+
+  .refresh-btn{margin:0 16px;width:calc(100% - 32px);padding:16px;border-radius:16px;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-family:var(--font-head);font-size:15px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:all 0.2s}
+  .refresh-btn:hover{background:var(--surface);border-color:rgba(255,255,255,0.15)}
+  .refresh-btn:active{transform:scale(0.98)}
+  .refresh-btn.spinning svg{animation:spin 0.8s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .refresh-btn svg{width:16px;height:16px;flex-shrink:0}
+  .last-updated{text-align:center;font-size:11px;font-family:var(--font-mono);color:var(--muted);margin-bottom:16px}
+
+  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:#1c1010;border:1px solid #3a1a1a;color:#ff7a7a;padding:12px 20px;border-radius:12px;font-size:13px;font-family:var(--font-mono);transition:transform 0.3s cubic-bezier(0.34,1.56,0.64,1);white-space:nowrap;z-index:200}
+  .toast.show{transform:translateX(-50%) translateY(0)}
+  .toast.success{background:var(--green-dim);border-color:var(--green);color:var(--green)}
+
+  .loading-screen{display:flex;align-items:center;justify-content:center;min-height:100vh}
+  .loading-dot{width:8px;height:8px;border-radius:50%;background:var(--green);animation:ldot 1s ease-in-out infinite;margin:0 4px}
+  .loading-dot:nth-child(2){animation-delay:0.15s}
+  .loading-dot:nth-child(3){animation-delay:0.3s}
+  @keyframes ldot{0%,80%,100%{opacity:0.2;transform:scale(0.8)}40%{opacity:1;transform:scale(1)}}
+</style>
+</head>
+<body>
+
+<div id="screen-loading" class="screen active">
+  <div class="loading-screen">
+    <div class="loading-dot"></div><div class="loading-dot"></div><div class="loading-dot"></div>
+  </div>
+</div>
+
+<div id="screen-login" class="screen">
+  <div class="auth-wrap">
+    <div class="auth-logo">Moi<span>st</span></div>
+    <div class="auth-tagline">soil moisture · anywhere</div>
+    <div class="auth-title">Welcome back</div>
+    <div class="auth-sub">Sign in to see your plants</div>
+    <div class="auth-error" id="login-error"></div>
+    <div class="field"><label>Email</label><input type="email" id="login-email" placeholder="you@example.com" autocomplete="email"></div>
+    <div class="field"><label>Password</label><input type="password" id="login-password" placeholder="••••••••" autocomplete="current-password"></div>
+    <button class="btn-primary" id="login-btn" onclick="doLogin()">Sign in</button>
+    <div class="divider"><div class="divider-line"></div><span>or</span><div class="divider-line"></div></div>
+    <button class="btn-google" onclick="doGoogle()">
+      <svg viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+      Continue with Google
+    </button>
+    <div class="auth-switch">No account? <a onclick="showScreen('signup')">Sign up free</a></div>
+  </div>
+</div>
+
+<div id="screen-signup" class="screen">
+  <div class="auth-wrap">
+    <div class="auth-logo">Moi<span>st</span></div>
+    <div class="auth-tagline">soil moisture · anywhere</div>
+    <div class="auth-title">Create account</div>
+    <div class="auth-sub">Start monitoring your plants</div>
+    <div class="auth-error" id="signup-error"></div>
+    <div class="field"><label>Email</label><input type="email" id="signup-email" placeholder="you@example.com" autocomplete="email"></div>
+    <div class="field"><label>Password</label><input type="password" id="signup-password" placeholder="Min 6 characters" autocomplete="new-password"></div>
+    <button class="btn-primary" id="signup-btn" onclick="doSignup()">Create account</button>
+    <div class="divider"><div class="divider-line"></div><span>or</span><div class="divider-line"></div></div>
+    <button class="btn-google" onclick="doGoogle()">
+      <svg viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+      Continue with Google
+    </button>
+    <div class="auth-switch">Already have an account? <a onclick="showScreen('login')">Sign in</a></div>
+  </div>
+</div>
+
+<div id="screen-add-device" class="screen">
+  <div class="add-device-wrap">
+    <button class="back-btn" onclick="stopDeviceSearch();showScreen('dashboard')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+      Back
+    </button>
+    <div class="auth-title">Add a device</div>
+    <div class="auth-sub" style="margin-bottom:32px">Plug in your ESP32 and we'll detect it automatically</div>
+
+    <div id="waiting-state">
+      <div style="display:flex;flex-direction:column;align-items:center;gap:20px;padding:32px 0;">
+        <div id="search-dots" style="display:flex;gap:8px;">
+          <div class="loading-dot"></div>
+          <div class="loading-dot"></div>
+          <div class="loading-dot"></div>
+        </div>
+        <div style="font-size:14px;color:var(--muted);font-family:var(--font-mono);text-align:center;" id="waiting-label">Waiting for device...</div>
+      </div>
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:20px;">
+        <div style="font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);font-family:var(--font-mono);margin-bottom:10px;">Steps</div>
+        <div style="font-size:13px;color:#b0b0b0;line-height:2;">
+          1. Plug your ESP32 into power<br>
+          2. Make sure it's on the same WiFi<br>
+          3. Wait a few seconds
+        </div>
+      </div>
+    </div>
+
+    <div id="found-state" style="display:none;">
+      <div style="background:#1a3a22;border:1px solid #3B6D11;border-radius:12px;padding:16px;margin-bottom:20px;">
+        <div style="font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:#639922;font-family:var(--font-mono);margin-bottom:6px;">Device found</div>
+        <div style="font-family:var(--font-mono);font-size:13px;color:var(--green);" id="found-device-id"></div>
+      </div>
+      <div class="auth-error" id="device-error"></div>
+      <div class="field"><label>Plant name</label><input type="text" id="device-name-input" placeholder="Living room fern"></div>
+      <button class="btn-primary" onclick="doAddDevice()">Add this device</button>
+    </div>
+  </div>
+</div>
+
+<div id="screen-dashboard" class="screen">
+  <div class="app-wrap">
+    <div class="header">
+      <div>
+        <div class="header-title">Moist</div>
+        <div class="header-plant" id="active-plant-name">My Plant</div>
+        <div class="conn-indicator">
+          <div class="conn-dot" id="conn-dot"></div>
+          <span id="conn-label">Connecting...</span>
+        </div>
+      </div>
+      <div class="header-btns">
+        <button class="icon-btn" onclick="showScreen('add-device')" title="Add device">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        </button>
+        <button class="icon-btn" onclick="doSignOut()" title="Sign out">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <div class="gauge-card" id="gauge-card">
+      <div class="gauge-wrap">
+        <svg viewBox="0 0 200 115" xmlns="http://www.w3.org/2000/svg">
+          <path d="M20,105 A80,80 0 0,1 180,105" fill="none" stroke="#1c1c1c" stroke-width="12" stroke-linecap="round"/>
+          <path id="gauge-arc" d="M20,105 A80,80 0 0,1 180,105" fill="none" stroke="#5aff7e" stroke-width="12" stroke-linecap="round" stroke-dasharray="251" stroke-dashoffset="251"/>
+        </svg>
+        <div class="gauge-pct" id="gauge-pct" style="color:var(--muted)">--%</div>
+      </div>
+      <div class="status-pill pill-ok" id="status-pill">
+        <span class="pill-dot"></span>
+        <span id="status-text">Waiting for reading</span>
+      </div>
+    </div>
+
+    <div class="metrics">
+      <div class="metric"><div class="metric-label">Moisture</div><div class="metric-value" id="m-pct">--<span class="metric-unit">%</span></div></div>
+      <div class="metric"><div class="metric-label">Raw ADC</div><div class="metric-value" id="m-raw">----</div></div>
+    </div>
+
+    <div class="history-card">
+      <div class="history-header">
+        <div class="history-title">History</div>
+        <div id="hist-count" style="font-size:11px;color:var(--muted);font-family:var(--font-mono)">0 readings</div>
+      </div>
+      <div class="bars" id="bars"></div>
+    </div>
+
+    <div class="devices-card">
+      <div class="devices-header">
+        <div class="devices-title">My devices</div>
+        <button class="add-device-btn" onclick="showScreen('add-device')">+ Add device</button>
+      </div>
+      <div id="device-list"><div class="no-devices">No devices yet</div></div>
+    </div>
+
+    <div class="last-updated" id="last-updated">No readings yet</div>
+    <button class="refresh-btn" id="refresh-btn" onclick="fetchReadings()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+      Refresh now
+    </button>
+    <button class="refresh-btn" id="notif-btn" onclick="enableNotifications()" style="margin-top:10px;border-color:rgba(90,255,126,0.3);color:var(--green)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+      <span id="notif-btn-text">Enable notifications</span>
+    </button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+var SUPABASE_URL='https://usoirglmgylpyokmusez.supabase.co';
+var SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVzb2lyZ2xtZ3lscHlva211c2V6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY3NDY1MTgsImV4cCI6MjA5MjMyMjUxOH0.MOtJbBJP3WpqD7EZFnrRGUM-zuR4nyR02qIF-FK4Ncg';
+var sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+var currentUser=null,userDevices=[],activeDeviceId=null,historyData=[],refreshTimer=null;
+
+function showScreen(name){
+  document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active')});
+  document.getElementById('screen-'+name).classList.add('active');
+  if(name==='add-device') startDeviceSearch();
+  if(name!=='add-device') stopDeviceSearch();
+}
+
+async function init(){
+  var {data:{session}}=await sb.auth.getSession();
+  if(session){currentUser=session.user;await loadDashboard();}
+  else showScreen('login');
+}
+
+async function doLogin(){
+  var email=document.getElementById('login-email').value.trim();
+  var password=document.getElementById('login-password').value;
+  var btn=document.getElementById('login-btn');
+  btn.disabled=true;btn.textContent='Signing in...';
+  var {data,error}=await sb.auth.signInWithPassword({email,password});
+  btn.disabled=false;btn.textContent='Sign in';
+  if(error){showAuthError('login-error',error.message);return;}
+  currentUser=data.user;await loadDashboard();
+}
+
+async function doSignup(){
+  var email=document.getElementById('signup-email').value.trim();
+  var password=document.getElementById('signup-password').value;
+  var btn=document.getElementById('signup-btn');
+  btn.disabled=true;btn.textContent='Creating account...';
+  var {data,error}=await sb.auth.signUp({email,password});
+  btn.disabled=false;btn.textContent='Create account';
+  if(error){showAuthError('signup-error',error.message);return;}
+  showToast('Check your email to confirm your account',true);
+  showScreen('login');
+}
+
+async function doGoogle(){
+  await sb.auth.signInWithOAuth({provider:'google',options:{redirectTo:window.location.href}});
+}
+
+async function doSignOut(){
+  await sb.auth.signOut();
+  currentUser=null;userDevices=[];
+  if(refreshTimer)clearInterval(refreshTimer);
+  showScreen('login');
+}
+
+sb.auth.onAuthStateChange(async function(event,session){
+  if(event==='SIGNED_IN'&&session){currentUser=session.user;await loadDashboard();}
+});
+
+async function loadDashboard(){
+  showScreen('dashboard');
+  await loadDevices();
+  if(userDevices.length===0){showScreen('add-device');return;}
+  activeDeviceId=userDevices[0].device_id;
+  document.getElementById('active-plant-name').textContent=userDevices[0].plant_name||'My Plant';
+  renderDeviceList();fetchReadings();
+  if(refreshTimer)clearInterval(refreshTimer);
+  refreshTimer=setInterval(fetchReadings,10000);
+}
+
+async function loadDevices(){
+  var {data,error}=await sb.from('devices').select('*').order('created_at');
+  if(!error&&data)userDevices=data;
+}
+
+async function deleteDevice(deviceId){
+  var {error}=await sb.from('devices').delete().eq('device_id',deviceId).eq('user_id',currentUser.id);
+  if(!error){
+    await loadDevices();
+    if(activeDeviceId===deviceId)activeDeviceId=userDevices.length?userDevices[0].device_id:null;
+    renderDeviceList();
+    if(activeDeviceId)fetchReadings();
+  }
+}
+
+function renderDeviceList(){
+  var el=document.getElementById('device-list');
+  if(!userDevices.length){el.innerHTML='<div class="no-devices">No devices yet</div>';return;}
+  el.innerHTML=userDevices.map(function(d){
+    var active=d.device_id===activeDeviceId;
+    return '<div class="device-row" onclick="selectDevice(\''+d.device_id+'\',\''+(d.plant_name||'My Plant')+'\')">'
+      +'<div class="device-info">'
+      +'<div class="device-name" style="color:'+(active?'var(--green)':'var(--text)')+'">'+( d.plant_name||'My Plant')+'</div>'
+      +'<div class="device-id-label">'+d.device_id+'</div>'
+      +'</div>'
+      +'<button class="device-delete" onclick="event.stopPropagation();deleteDevice(\''+d.device_id+'\')">×</button>'
+      +'</div>';
+  }).join('');
+}
+
+function selectDevice(deviceId,plantName){
+  activeDeviceId=deviceId;
+  document.getElementById('active-plant-name').textContent=plantName;
+  renderDeviceList();fetchReadings();
+}
+
+async function fetchReadings(){
+  if(!activeDeviceId)return;
+  var btn=document.getElementById('refresh-btn');
+  btn.classList.add('spinning');
+  var {data,error}=await sb.from('readings').select('*').eq('device_id',activeDeviceId).order('created_at',{ascending:false}).limit(20);
+  btn.classList.remove('spinning');
+  if(error||!data||!data.length){
+    document.getElementById('conn-dot').className='conn-dot error';
+    document.getElementById('conn-label').textContent=error?'Connection failed':'No data yet';
+    return;
+  }
+  var latest=data[0];
+  updateGauge(latest.moisture,latest.raw_adc,latest.status);
+  historyData=data.slice(0,12).reverse();
+  renderBars();
+  document.getElementById('conn-dot').className='conn-dot live';
+  document.getElementById('conn-label').textContent='Live · Supabase';
+  var t=new Date(latest.created_at);
+  document.getElementById('last-updated').textContent='Last reading '+t.getHours()+':'+String(t.getMinutes()).padStart(2,'0')+':'+String(t.getSeconds()).padStart(2,'0');
+}
+
+function colorFor(v){return v<30?'#ffb830':v>=70?'#4aadff':'#5aff7e'}
+
+function updateGauge(moisture,raw,status){
+  var color=colorFor(moisture);
+  var arc=document.getElementById('gauge-arc');
+  arc.style.strokeDashoffset=251-(moisture/100)*251;
+  arc.style.stroke=color;
+  document.getElementById('gauge-pct').textContent=moisture+'%';
+  document.getElementById('gauge-pct').style.color=color;
+  document.getElementById('m-pct').innerHTML=moisture+'<span class="metric-unit">%</span>';
+  document.getElementById('m-raw').textContent=raw;
+  var pill=document.getElementById('status-pill');
+  var card=document.getElementById('gauge-card');
+  pill.className='status-pill';card.className='gauge-card';
+  if(status==='DRY'){pill.classList.add('pill-dry');document.getElementById('status-text').textContent='Soil is dry — water needed';card.classList.add('dry');}
+  else if(status==='WET'){pill.classList.add('pill-wet');document.getElementById('status-text').textContent='Soil is wet — no watering';card.classList.add('wet');}
+  else{pill.classList.add('pill-ok');document.getElementById('status-text').textContent='Soil is OK';}
+}
+
+function renderBars(){
+  var el=document.getElementById('bars');el.innerHTML='';
+  historyData.forEach(function(r){
+    var b=document.createElement('div');b.className='bar';
+    b.style.height=Math.max(4,r.moisture)+'%';b.style.background=colorFor(r.moisture);b.style.opacity='0.75';
+    el.appendChild(b);
+  });
+  document.getElementById('hist-count').textContent=historyData.length+' readings';
+}
+
+function showAuthError(id,msg){var el=document.getElementById(id);el.textContent=msg;el.classList.add('show');}
+function showToast(msg,success){
+  var t=document.getElementById('toast');t.textContent=msg;
+  t.className='toast'+(success?' success':'')+' show';
+  setTimeout(function(){t.classList.remove('show');},3000);
+}
+
+var scannedDeviceId = null;
+var deviceSearchTimer = null;
+
+async function startDeviceSearch() {
+  scannedDeviceId = null;
+  document.getElementById('waiting-state').style.display = 'block';
+  document.getElementById('found-state').style.display = 'none';
+  document.getElementById('waiting-label').textContent = 'Waiting for device...';
+  if (deviceSearchTimer) clearInterval(deviceSearchTimer);
+  deviceSearchTimer = setInterval(pollForDevice, 3000);
+  pollForDevice();
+}
+
+async function pollForDevice() {
+  if (!currentUser) { console.log('Poll: no user yet'); return; }
+  var { data, error } = await sb
+    .from('pending_devices')
+    .select('device_id, created_at')
+    .order('created_at', { ascending: false })
+    .limit(1);
+
+  console.log('Poll result:', data, error);
+  if (error || !data || !data.length) { console.log('Poll: no data'); return; }
+
+  var device = data[0];
+  var age = (Date.now() - new Date(device.created_at).getTime()) / 1000;
+  console.log('Device age (seconds):', age, 'device_id:', device.device_id);
+  if (age > 600) { console.log('Poll: device too old'); return; }
+
+  scannedDeviceId = device.device_id;
+  stopDeviceSearch();
+  document.getElementById('found-device-id').textContent = device.device_id;
+  document.getElementById('waiting-state').style.display = 'none';
+  document.getElementById('found-state').style.display = 'block';
+  showToast('Device found!', true);
+}
+
+function stopDeviceSearch() {
+  if (deviceSearchTimer) { clearInterval(deviceSearchTimer); deviceSearchTimer = null; }
+}
+
+async function doAddDevice() {
+  var deviceId = scannedDeviceId;
+  var plantName = document.getElementById('device-name-input').value.trim() || 'My Plant';
+  if (!deviceId) { showAuthError('device-error', 'No device found yet — plug in your ESP32 and wait'); return; }
+
+  var { error } = await sb.from('devices').insert({ user_id: currentUser.id, device_id: deviceId, plant_name: plantName });
+  if (error) { showAuthError('device-error', error.message); return; }
+
+  // Remove from pending_devices
+  await sb.from('pending_devices').delete().eq('device_id', deviceId);
+
+  document.getElementById('device-name-input').value = '';
+  scannedDeviceId = null;
+  showToast('Device added!', true);
+  await loadDashboard();
+}
+
+var VAPID_PUBLIC_KEY='BMJNDc_dMjjJcMijUmuHm2xGRrCC6T1QsuMfcuERE_Aa6ZI-NCcsP2f6hclYcWRZjmesBV-pjUiFOoEF-iIlXn4';
+
+function urlBase64ToUint8Array(base64String){
+  var padding='='.repeat((4-base64String.length%4)%4);
+  var base64=(base64String+padding).replace(/-/g,'+').replace(/_/g,'/');
+  var rawData=atob(base64);
+  return Uint8Array.from([...rawData].map(function(c){return c.charCodeAt(0);}));
+}
+
+async function enableNotifications(){
+  var btn=document.getElementById('notif-btn');
+  var txt=document.getElementById('notif-btn-text');
+  if(!('serviceWorker' in navigator)||!('PushManager' in window)){
+    showToast('Push notifications not supported in this browser');return;
+  }
+  try {
+    var reg=await navigator.serviceWorker.register('/sw.js');
+    var permission=await Notification.requestPermission();
+    if(permission!=='granted'){showToast('Notification permission denied');return;}
+    txt.textContent='Saving...';btn.disabled=true;
+    var sub=await reg.pushManager.subscribe({
+      userVisibleOnly:true,
+      applicationServerKey:urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
+    });
+    var {error}=await sb.from('push_subscriptions').insert({
+      user_id:currentUser.id,
+      subscription:sub.toJSON()
+    });
+    btn.disabled=false;
+    if(error){txt.textContent='Enable notifications';showToast('Could not save subscription');return;}
+    txt.textContent='Notifications on';
+    btn.style.background='var(--green-dim)';
+    showToast('Notifications enabled!',true);
+  } catch(e){
+    btn.disabled=false;txt.textContent='Enable notifications';
+    showToast('Could not enable notifications');
+  }
+}
+
+async function checkNotifStatus(){
+  if(!('Notification' in window))return;
+  if(Notification.permission==='granted'){
+    document.getElementById('notif-btn-text').textContent='Notifications on';
+    document.getElementById('notif-btn').style.background='var(--green-dim)';
+  }
+}
+
+init();
+checkNotifStatus();
+</script>
+</body>
+</html>
