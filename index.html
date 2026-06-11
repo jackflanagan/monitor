@@ -299,21 +299,13 @@ function showScreen(name){
   if(name!=='add-device') stopDeviceSearch();
 }
 
-async function init(){
-  var {data:{session}}=await sb.auth.getSession();
-  if(session){
-    currentUser=session.user;
-    await loadDashboard();
-  } else {
-    // Wait for any in-flight OAuth redirect session to settle
-    var resolved=await new Promise(function(resolve){
-      var unsub=sb.auth.onAuthStateChange(function(event,s){
-        if(event==='INITIAL_SESSION'){unsub.data.subscription.unsubscribe();resolve(s);}
-      });
-    });
-    if(resolved){currentUser=resolved.user;await loadDashboard();}
-    else showScreen('login');
-  }
+function init(){
+  sb.auth.onAuthStateChange(async function(event,session){
+    if(event==='INITIAL_SESSION'||event==='SIGNED_IN'){
+      if(session){currentUser=session.user;await loadDashboard();}
+      else showScreen('login');
+    }
+  });
 }
 
 async function doLogin(){
@@ -343,15 +335,11 @@ async function doGoogle(){
   await sb.auth.signInWithOAuth({provider:'google',options:{redirectTo:window.location.href}});
 }
 
-async function doSignOut(){
+function doSignOut(){
   if(refreshTimer)clearInterval(refreshTimer);
-  await sb.auth.signOut();
+  sb.auth.signOut().catch(function(){});
   window.location.href='/';
 }
-
-sb.auth.onAuthStateChange(async function(event,session){
-  if(event==='SIGNED_IN'&&session){currentUser=session.user;await loadDashboard();}
-});
 
 async function loadDashboard(){
   showScreen('dashboard');
