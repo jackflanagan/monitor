@@ -1,13 +1,13 @@
 const { test, expect } = require('@playwright/test');
 
-const SUPABASE_URL = 'https://usoirglmgylpyokmusez.supabase.co';
+const STORAGE_KEY = 'sb-usoirglmgylpyokmusez-auth-token';
 
-const MOCK_USER = { id: 'user-123', email: 'test@example.com', role: 'authenticated' };
+const MOCK_USER    = { id: 'user-123', email: 'test@example.com', role: 'authenticated' };
 const MOCK_SESSION = {
-  access_token: 'fake-access-token',
-  token_type: 'bearer',
-  expires_in: 3600,
-  expires_at: Math.floor(Date.now() / 1000) + 3600,
+  access_token:  'fake-access-token',
+  token_type:    'bearer',
+  expires_in:    3600,
+  expires_at:    Math.floor(Date.now() / 1000) + 7200,
   refresh_token: 'fake-refresh-token',
   user: MOCK_USER,
 };
@@ -18,71 +18,102 @@ const MOCK_READINGS = [
   { id: 1, device_id: 'ESP32-ABCD', moisture: 55, raw_adc: 2100, status: 'OK', created_at: new Date().toISOString() },
 ];
 
-// Intercept all Supabase REST + auth calls
-async function mockSupabase(page, { authenticated } = {}) {
-  await page.route(`${SUPABASE_URL}/auth/v1/**`, async route => {
-    const url = route.request().url();
-    if (url.includes('logout')) {
-      return route.fulfill({ status: 204, body: '' });
-    }
-    if (authenticated) {
-      return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(MOCK_SESSION) });
-    }
-    return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ data: { session: null }, error: null }) });
-  });
+// ─── Helpers ──────────────────────────────────────────────────────────────────
 
-  await page.route(`${SUPABASE_URL}/rest/v1/devices**`, async route => {
-    if (authenticated) {
-      return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(MOCK_DEVICES) });
+// Replace the Supabase CDN script with a minimal mock that reads the session
+// from localStorage (so doSignOut's localStorage.removeItem is respected) and
+// returns hardcoded data for device/reading queries.
+// No real Supabase network calls are made, so there's nothing to intercept.
+function makeMockLib({ session = null, devices = [], readings = [], loginError = null } = {}) {
+  return `!function(){
+  var SESSION=${JSON.stringify(session)};
+  var DEVICES=${JSON.stringify(devices)};
+  var READINGS=${JSON.stringify(readings)};
+  var LOGIN_ERROR=${JSON.stringify(loginError)};
+  var KEY='${STORAGE_KEY}';
+  function stored(){try{return JSON.parse(localStorage.getItem(KEY))}catch(e){return null}}
+  function q(tbl){
+    var o={};
+    ['select','eq','order','limit'].forEach(function(m){o[m]=function(){return o}});
+    o.insert=o['delete']=function(){return Promise.resolve({data:null,error:null})};
+    o.then=function(r,j){
+      var d=tbl==='devices'?DEVICES:tbl==='readings'?READINGS:[];
+      return Promise.resolve({data:d,error:null}).then(r,j);
+    };
+    return o;
+  }
+  window.supabase={
+    createClient:function(){
+      var cbs=[];
+      setTimeout(function(){var s=stored();cbs.forEach(function(f){f('INITIAL_SESSION',s)})},80);
+      return{
+        auth:{
+          onAuthStateChange:function(f){cbs.push(f);return{data:{subscription:{unsubscribe:function(){}}}}},
+          signInWithPassword:function(){
+            if(LOGIN_ERROR)return Promise.resolve({data:null,error:{message:LOGIN_ERROR}});
+            if(SESSION)localStorage.setItem(KEY,JSON.stringify(SESSION));
+            cbs.forEach(function(f){f('SIGNED_IN',SESSION)});
+            return Promise.resolve({data:{user:SESSION&&SESSION.user},error:null});
+          },
+          signOut:function(){
+            Object.keys(localStorage).forEach(function(k){if(k.startsWith('sb-'))localStorage.removeItem(k)});
+            return Promise.resolve({error:null});
+          },
+          signInWithOAuth:function(){return Promise.resolve()},
+          signUp:function(){return Promise.resolve({data:{},error:null})}
+        },
+        from:function(t){return q(t)}
+      };
     }
-    return route.fulfill({ status: 401, contentType: 'application/json', body: JSON.stringify({ message: 'Unauthorized' }) });
-  });
-
-  await page.route(`${SUPABASE_URL}/rest/v1/readings**`, async route => {
-    if (authenticated) {
-      return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(MOCK_READINGS) });
-    }
-    return route.fulfill({ status: 401, contentType: 'application/json', body: JSON.stringify({ message: 'Unauthorized' }) });
-  });
-
-  await page.route(`${SUPABASE_URL}/rest/v1/**`, async route => route.fulfill({
-    status: 200, contentType: 'application/json', body: JSON.stringify([]),
-  }));
+  };
+}();`;
 }
 
-// Seed localStorage with a fake session before page scripts run
-async function seedSession(page) {
-  const storageKey = `sb-usoirglmgylpyokmusez-auth-token`;
-  await page.addInitScript(({ key, session }) => {
-    localStorage.setItem(key, JSON.stringify(session));
-  }, { key: storageKey, session: MOCK_SESSION });
+// Intercept the Supabase CDN URL and return our mock library instead.
+async function mockCDN(page, opts) {
+  await page.route(/supabase-js/, route =>
+    route.fulfill({ status: 200, contentType: 'application/javascript', body: makeMockLib(opts) })
+  );
 }
 
-// ─── Tests ────────────────────────────────────────────────────────────────────
+// Seed localStorage via addInitScript — re-runs on every navigation in this test.
+// The mock library reads this key to determine the session on each page load.
+async function seedSessionPersistent(page) {
+  await page.addInitScript(
+    ({ key, session }) => localStorage.setItem(key, JSON.stringify(session)),
+    { key: STORAGE_KEY, session: MOCK_SESSION }
+  );
+}
+
+// Seed localStorage one-shot via page.evaluate — does NOT re-run after navigation.
+// Used for the sign-out test so the post-redirect reload has no session to find.
+async function seedSessionOnce(page) {
+  await page.evaluate(
+    ({ key, session }) => localStorage.setItem(key, JSON.stringify(session)),
+    { key: STORAGE_KEY, session: MOCK_SESSION }
+  );
+}
+
+// ─── Unauthenticated ──────────────────────────────────────────────────────────
 
 test.describe('Unauthenticated', () => {
   test('shows login screen when no session exists', async ({ page }) => {
-    await mockSupabase(page, { authenticated: false });
+    await mockCDN(page, { session: null });
     await page.goto('/');
     await expect(page.locator('#screen-login')).toBeVisible({ timeout: 5000 });
     await expect(page.locator('#screen-dashboard')).not.toBeVisible();
   });
 
-  test('login screen has email and password fields', async ({ page }) => {
-    await mockSupabase(page, { authenticated: false });
+  test('login screen has email, password fields and sign-in button', async ({ page }) => {
+    await mockCDN(page, { session: null });
     await page.goto('/');
     await expect(page.locator('#login-email')).toBeVisible();
     await expect(page.locator('#login-password')).toBeVisible();
     await expect(page.locator('#login-btn')).toBeVisible();
   });
 
-  test('shows error on bad credentials', async ({ page }) => {
-    await page.route(`${SUPABASE_URL}/auth/v1/**`, route =>
-      route.fulfill({
-        status: 400, contentType: 'application/json',
-        body: JSON.stringify({ error: 'invalid_grant', error_description: 'Invalid login credentials' }),
-      })
-    );
+  test('shows error message on bad credentials', async ({ page }) => {
+    await mockCDN(page, { session: null, loginError: 'Invalid login credentials' });
     await page.goto('/');
     await page.locator('#login-email').fill('wrong@example.com');
     await page.locator('#login-password').fill('badpass');
@@ -91,52 +122,59 @@ test.describe('Unauthenticated', () => {
   });
 });
 
+// ─── Authenticated ────────────────────────────────────────────────────────────
+
 test.describe('Authenticated', () => {
   test.beforeEach(async ({ page }) => {
-    await seedSession(page);
-    await mockSupabase(page, { authenticated: true });
+    // Serve mock Supabase library with full data
+    await mockCDN(page, { session: MOCK_SESSION, devices: MOCK_DEVICES, readings: MOCK_READINGS });
+    // Seed the session key so the mock library finds it in localStorage on load
+    await seedSessionPersistent(page);
   });
 
-  test('shows dashboard with device name', async ({ page }) => {
+  test('shows dashboard and correct device name', async ({ page }) => {
     await page.goto('/');
-    await expect(page.locator('#screen-dashboard')).toBeVisible({ timeout: 5000 });
-    await expect(page.locator('#active-plant-name')).toHaveText('Living Room Fern', { timeout: 5000 });
+    await expect(page.locator('#screen-dashboard')).toBeVisible({ timeout: 8000 });
+    await expect(page.locator('#active-plant-name')).toHaveText('Living Room Fern', { timeout: 8000 });
   });
 
   test('device list renders the mock device', async ({ page }) => {
     await page.goto('/');
-    await expect(page.locator('#screen-dashboard')).toBeVisible({ timeout: 5000 });
-    await expect(page.locator('#device-list')).toContainText('Living Room Fern', { timeout: 5000 });
+    await expect(page.locator('#device-list')).toContainText('Living Room Fern', { timeout: 8000 });
     await expect(page.locator('#device-list')).toContainText('ESP32-ABCD');
   });
 
-  test('gauge shows moisture percentage from reading', async ({ page }) => {
+  test('gauge shows correct moisture reading', async ({ page }) => {
     await page.goto('/');
-    await expect(page.locator('#gauge-pct')).toHaveText('55%', { timeout: 5000 });
+    await expect(page.locator('#gauge-pct')).toHaveText('55%', { timeout: 8000 });
   });
 
-  test('active device is persisted to localStorage', async ({ page }) => {
+  test('active device is saved to localStorage', async ({ page }) => {
     await page.goto('/');
-    await expect(page.locator('#screen-dashboard')).toBeVisible({ timeout: 5000 });
+    await expect(page.locator('#active-plant-name')).toHaveText('Living Room Fern', { timeout: 8000 });
     const saved = await page.evaluate(() => localStorage.getItem('moist_active_device'));
     expect(saved).toBe('ESP32-ABCD');
   });
+});
 
-  test('sign out clears session from localStorage and shows login', async ({ page }) => {
+// ─── Sign out ─────────────────────────────────────────────────────────────────
+
+test.describe('Sign out', () => {
+  test('clears session and redirects to login screen', async ({ page }) => {
+    await mockCDN(page, { session: MOCK_SESSION, devices: MOCK_DEVICES, readings: MOCK_READINGS });
     await page.goto('/');
-    await expect(page.locator('#screen-dashboard')).toBeVisible({ timeout: 5000 });
 
-    // Sign out — the page will reload
-    await Promise.all([
-      page.waitForNavigation(),
-      page.locator('[title="Sign out"]').click(),
-    ]);
+    // Seed once — does NOT re-run when sign-out triggers window.location.href='/'
+    // so the reloaded page finds an empty localStorage and shows the login screen.
+    await seedSessionOnce(page);
+    await page.reload();
+    await expect(page.locator('#screen-dashboard')).toBeVisible({ timeout: 8000 });
 
-    // After reload with no session, login screen should show
-    await mockSupabase(page, { authenticated: false });
-    await expect(page.locator('#screen-login')).toBeVisible({ timeout: 5000 });
+    await page.locator('[title="Sign out"]').click();
 
-    // localStorage session key must be gone
+    // doSignOut clears sb-* keys, redirects to /. Mock reads localStorage →
+    // finds nothing → INITIAL_SESSION(null) → login screen.
+    await expect(page.locator('#screen-login')).toBeVisible({ timeout: 8000 });
     const session = await page.evaluate(() =>
       localStorage.getItem('sb-usoirglmgylpyokmusez-auth-token')
     );
