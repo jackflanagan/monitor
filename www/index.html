@@ -349,8 +349,11 @@ async function loadDashboard(){
   showScreen('dashboard');
   await loadDevices();
   if(userDevices.length===0){showScreen('add-device');return;}
-  activeDeviceId=userDevices[0].device_id;
-  document.getElementById('active-plant-name').textContent=userDevices[0].plant_name||'My Plant';
+  var saved=localStorage.getItem('moist_active_device');
+  var match=saved&&userDevices.find(function(d){return d.device_id===saved;});
+  activeDeviceId=(match||userDevices[0]).device_id;
+  localStorage.setItem('moist_active_device',activeDeviceId);
+  document.getElementById('active-plant-name').textContent=(match||userDevices[0]).plant_name||'My Plant';
   renderDeviceList();fetchReadings();
   if(refreshTimer)clearInterval(refreshTimer);
   refreshTimer=setInterval(fetchReadings,10000);
@@ -368,7 +371,11 @@ async function deleteDevice(deviceId){
   var {error}=await sb.from('devices').delete().eq('device_id',deviceId).eq('user_id',currentUser.id);
   if(!error){
     await loadDevices();
-    if(activeDeviceId===deviceId)activeDeviceId=userDevices.length?userDevices[0].device_id:null;
+    if(activeDeviceId===deviceId){
+      activeDeviceId=userDevices.length?userDevices[0].device_id:null;
+      if(activeDeviceId)localStorage.setItem('moist_active_device',activeDeviceId);
+      else localStorage.removeItem('moist_active_device');
+    }
     renderDeviceList();
     if(activeDeviceId)fetchReadings();
   }
@@ -391,6 +398,7 @@ function renderDeviceList(){
 
 function selectDevice(deviceId,plantName){
   activeDeviceId=deviceId;
+  localStorage.setItem('moist_active_device',deviceId);
   document.getElementById('active-plant-name').textContent=plantName;
   renderDeviceList();fetchReadings();
 }
