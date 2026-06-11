@@ -13,6 +13,7 @@
 <link rel="icon" type="image/svg+xml" href="/icon.svg">
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Cabinet+Grotesk:wght@400;500;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
 <script src="/src/utils.js"></script>
 <style>
   :root {
@@ -171,6 +172,57 @@
   .banner-calibrate{background:var(--blue-dim);border:1px solid rgba(74,173,255,0.25);color:var(--blue)}
   .banner svg{width:15px;height:15px;flex-shrink:0}
   .banner-action{background:none;border:none;color:inherit;font-family:var(--font-mono);font-size:12px;text-decoration:underline;cursor:pointer;margin-left:auto;white-space:nowrap;padding:0}
+
+  /* Plant type label in header */
+  .header-plant-type{font-size:11px;font-family:var(--font-mono);color:var(--muted);margin-top:2px}
+
+  /* Plant switcher */
+  .plant-switcher{overflow-x:auto;scrollbar-width:none;padding:0 16px 12px;display:none;gap:10px;-webkit-overflow-scrolling:touch}
+  .plant-switcher.show{display:flex}
+  .plant-switcher::-webkit-scrollbar{display:none}
+  .plant-card{flex-shrink:0;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:12px 14px;cursor:pointer;transition:all 0.2s;min-width:110px;max-width:140px}
+  .plant-card.active{border-color:var(--green);background:var(--green-dim)}
+  .plant-card-name{font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:6px}
+  .plant-card-row{display:flex;align-items:center;gap:6px}
+  .plant-card-pct{font-size:12px;font-family:var(--font-mono);color:var(--muted)}
+  .plant-card.active .plant-card-pct{color:var(--green)}
+  .plant-card-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;background:var(--muted)}
+
+  /* Watering */
+  .water-btn{display:inline-flex;align-items:center;gap:7px;background:none;border:1px solid rgba(74,173,255,0.3);border-radius:12px;padding:9px 18px;color:var(--blue);font-family:var(--font-head);font-size:13px;font-weight:700;cursor:pointer;margin-top:12px;transition:all 0.2s}
+  .water-btn:hover{background:var(--blue-dim);border-color:rgba(74,173,255,0.5)}
+  .water-btn svg{width:14px;height:14px;flex-shrink:0}
+  .last-watered-label{font-size:11px;font-family:var(--font-mono);color:var(--muted);margin-top:8px}
+
+  /* Field select */
+  .field select{width:100%;padding:13px 14px;background:var(--surface);border:1px solid var(--border);border-radius:12px;color:var(--text);font-family:var(--font-mono);font-size:14px;outline:none;appearance:none;cursor:pointer;transition:border-color 0.2s;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%23666' d='M6 8L0 0h12z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center}
+  .field select:focus{border-color:rgba(255,255,255,0.2)}
+  .field select option{background:#141414;color:#f0f0f0}
+
+  /* History screen */
+  .history-screen-wrap{padding:0 0 48px}
+  .history-back-btn{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);cursor:pointer;padding:52px 24px 16px;background:none;border:none;font-family:var(--font-head);text-align:left}
+  .history-back-btn svg{width:16px;height:16px}
+  .history-screen-title{font-size:22px;font-weight:800;letter-spacing:-0.02em;padding:0 24px 2px}
+  .history-screen-sub{font-size:12px;font-family:var(--font-mono);color:var(--muted);padding:0 24px 20px}
+  .history-tabs{display:flex;padding:0 16px;margin-bottom:16px}
+  .history-tab{flex:1;padding:11px;text-align:center;font-size:13px;font-family:var(--font-mono);font-weight:500;border:1px solid var(--border);cursor:pointer;background:var(--surface);color:var(--muted);transition:all 0.2s}
+  .history-tab:first-child{border-radius:10px 0 0 10px}
+  .history-tab:last-child{border-radius:0 10px 10px 0}
+  .history-tab+.history-tab{border-left:none}
+  .history-tab.active{background:var(--green-dim);border-color:var(--green);color:var(--green)}
+  .history-chart-wrap{margin:0 16px;background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:20px 16px 12px;overflow:hidden;position:relative}
+  .history-stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:10px 16px 0}
+  .history-stat{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px}
+  .history-stat-label{font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);font-family:var(--font-mono);margin-bottom:6px}
+  .history-stat-value{font-size:26px;font-weight:800;letter-spacing:-0.02em}
+  .history-empty{text-align:center;padding:40px 0;font-size:13px;font-family:var(--font-mono);color:var(--muted)}
+  .history-watering-list{margin:10px 16px 0;background:var(--surface);border:1px solid var(--border);border-radius:16px;overflow:hidden}
+  .history-watering-title{font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);font-family:var(--font-mono);padding:12px 16px 10px;border-bottom:1px solid var(--border)}
+  .watering-row{display:flex;justify-content:space-between;align-items:center;padding:11px 16px;border-bottom:1px solid var(--border);font-size:13px}
+  .watering-row:last-child{border-bottom:none}
+  .watering-row-date{font-family:var(--font-mono);color:var(--muted);font-size:12px}
+  .watering-row-moist{font-family:var(--font-mono);font-weight:700;font-size:13px}
 </style>
 </head>
 <body>
@@ -254,6 +306,17 @@
       </div>
       <div class="auth-error" id="device-error"></div>
       <div class="field"><label>Plant name</label><input type="text" id="device-name-input" placeholder="Living room fern"></div>
+      <div class="field"><label>Plant type</label>
+        <select id="device-type-select">
+          <option value="">Choose type (optional)</option>
+          <option value="general">General houseplant</option>
+          <option value="succulent">Succulent</option>
+          <option value="cactus">Cactus</option>
+          <option value="tropical">Tropical</option>
+          <option value="herb">Herb</option>
+          <option value="fern">Fern</option>
+        </select>
+      </div>
       <button class="btn-primary" onclick="doAddDevice()">Add this device</button>
     </div>
   </div>
@@ -265,6 +328,7 @@
       <div>
         <div class="header-title">Moist</div>
         <div class="header-plant" id="active-plant-name">My Plant</div>
+        <div class="header-plant-type" id="active-plant-type"></div>
         <div class="conn-indicator">
           <div class="conn-dot" id="conn-dot"></div>
           <span id="conn-label">Connecting...</span>
@@ -279,6 +343,8 @@
         </button>
       </div>
     </div>
+
+    <div class="plant-switcher" id="plant-switcher"></div>
 
     <div class="banner banner-offline" id="banner-offline">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="1" y1="1" x2="23" y2="23"/><path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55"/><path d="M5 12.55a10.94 10.94 0 0 1 5.17-2.39"/><path d="M10.71 5.05A16 16 0 0 1 22.56 9"/><path d="M1.42 9a15.91 15.91 0 0 1 4.7-2.88"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/></svg>
@@ -303,6 +369,11 @@
         <span class="pill-dot"></span>
         <span id="status-text">Waiting for reading</span>
       </div>
+      <div class="last-watered-label" id="last-watered-label" style="display:none"></div>
+      <button class="water-btn" onclick="doMarkWatered()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>
+        Mark as watered
+      </button>
     </div>
 
     <div class="metrics">
@@ -310,10 +381,13 @@
       <div class="metric"><div class="metric-label">Raw ADC</div><div class="metric-value" id="m-raw">----</div></div>
     </div>
 
-    <div class="history-card">
+    <div class="history-card" onclick="openHistory()" style="cursor:pointer">
       <div class="history-header">
         <div class="history-title">History</div>
-        <div id="hist-count" style="font-size:11px;color:var(--muted);font-family:var(--font-mono)">0 readings</div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <div id="hist-count" style="font-size:11px;color:var(--muted);font-family:var(--font-mono)">0 readings</div>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;color:var(--muted)"><polyline points="9 18 15 12 9 6"/></svg>
+        </div>
       </div>
       <div class="bars" id="bars"></div>
     </div>
@@ -420,9 +494,53 @@
       <div class="calibrate-value" id="cal-wet-val">— <span>not set</span></div>
       <button class="calibrate-btn" onclick="doCalibrate('wet')">💧 Submerge sensor in water, then tap</button>
     </div>
-    <div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px">
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:14px">
       <div style="font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);font-family:var(--font-mono);margin-bottom:8px">Live reading</div>
       <div style="font-family:var(--font-mono);font-size:16px;color:var(--text)">Raw ADC: <span id="cal-current-adc">—</span></div>
+    </div>
+    <div class="field"><label>Quick preset — sets dry &amp; wet thresholds</label>
+      <select id="cal-type-select" onchange="applyPlantPreset(this.value)">
+        <option value="">Select plant type…</option>
+        <option value="general">General houseplant</option>
+        <option value="succulent">Succulent</option>
+        <option value="cactus">Cactus</option>
+        <option value="tropical">Tropical</option>
+        <option value="herb">Herb</option>
+        <option value="fern">Fern</option>
+      </select>
+    </div>
+  </div>
+</div>
+
+<div id="screen-history" class="screen">
+  <div class="history-screen-wrap">
+    <button class="history-back-btn" onclick="showScreen('dashboard')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+      Back
+    </button>
+    <div class="history-screen-title">History</div>
+    <div class="history-screen-sub" id="history-device-label">—</div>
+    <div class="history-tabs">
+      <div class="history-tab active" id="tab-24h" onclick="switchHistoryTab('24h')">24 hours</div>
+      <div class="history-tab" id="tab-7d" onclick="switchHistoryTab('7d')">7 days</div>
+      <div class="history-tab" id="tab-30d" onclick="switchHistoryTab('30d')">30 days</div>
+    </div>
+    <div class="history-chart-wrap">
+      <div id="history-chart-inner"><div class="history-empty">Loading…</div></div>
+    </div>
+    <div class="history-stats">
+      <div class="history-stat">
+        <div class="history-stat-label">Average moisture</div>
+        <div class="history-stat-value" id="hist-avg">—</div>
+      </div>
+      <div class="history-stat">
+        <div class="history-stat-label">Times gone dry</div>
+        <div class="history-stat-value" id="hist-dry-count">—</div>
+      </div>
+    </div>
+    <div class="history-watering-list" id="history-watering-list" style="display:none">
+      <div class="history-watering-title">💧 Watering events</div>
+      <div id="history-watering-rows"></div>
     </div>
   </div>
 </div>
@@ -435,6 +553,15 @@ var SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsI
 var sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 var currentUser=null,userDevices=[],activeDeviceId=null,historyData=[],refreshTimer=null;
 var latestRawAdc=null,calibratingDeviceId=null,onboardSlide=0,lastReadingTime=null;
+var deviceMoisture={},currentHistoryPeriod='24h',lastWateredDate=null;
+var PLANT_PRESETS={
+  general:{name:'General houseplant',dry:30,wet:75},
+  succulent:{name:'Succulent',dry:20,wet:60},
+  cactus:{name:'Cactus',dry:15,wet:50},
+  tropical:{name:'Tropical',dry:45,wet:85},
+  herb:{name:'Herb',dry:40,wet:80},
+  fern:{name:'Fern',dry:50,wet:90}
+};
 
 function showScreen(name){
   document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active')});
@@ -498,8 +625,11 @@ async function loadDashboard(){
   var match=saved&&userDevices.find(function(d){return d.device_id===saved;});
   activeDeviceId=(match||userDevices[0]).device_id;
   localStorage.setItem('moist_active_device',activeDeviceId);
-  document.getElementById('active-plant-name').textContent=(match||userDevices[0]).plant_name||'My Plant';
-  renderDeviceList();fetchReadings();updateCalibrationBanner();
+  var activeDevice=match||userDevices[0];
+  document.getElementById('active-plant-name').textContent=activeDevice.plant_name||'My Plant';
+  var preset=activeDevice.plant_type&&PLANT_PRESETS[activeDevice.plant_type];
+  document.getElementById('active-plant-type').textContent=preset?preset.name:'';
+  renderDeviceList();renderPlantSwitcher();fetchReadings();updateCalibrationBanner();fetchLastWatered();
   if(refreshTimer)clearInterval(refreshTimer);
   refreshTimer=setInterval(fetchReadings,10000);
 }
@@ -549,7 +679,10 @@ function selectDevice(deviceId,plantName){
   activeDeviceId=deviceId;
   localStorage.setItem('moist_active_device',deviceId);
   document.getElementById('active-plant-name').textContent=plantName;
-  renderDeviceList();fetchReadings();updateCalibrationBanner();
+  var device=userDevices.find(function(d){return d.device_id===deviceId;});
+  var preset=device&&device.plant_type&&PLANT_PRESETS[device.plant_type];
+  document.getElementById('active-plant-type').textContent=preset?preset.name:'';
+  renderDeviceList();renderPlantSwitcher();fetchReadings();updateCalibrationBanner();fetchLastWatered();
 }
 
 async function fetchReadings(){
@@ -579,7 +712,9 @@ async function fetchReadings(){
   } else {
     document.getElementById('banner-offline').classList.remove('show');
   }
+  deviceMoisture[activeDeviceId]=latest.moisture;
   updateGauge(latest.moisture,latest.raw_adc,latest.status);
+  renderPlantSwitcher();
   historyData=data.slice(0,12).reverse();
   renderBars();
   document.getElementById('conn-dot').className='conn-dot live';
@@ -669,7 +804,14 @@ async function doAddDevice() {
   var plantName = document.getElementById('device-name-input').value.trim() || 'My Plant';
   if (!deviceId) { showAuthError('device-error', 'No device found yet — plug in your ESP32 and wait'); return; }
 
-  var { error } = await sb.from('devices').insert({ user_id: currentUser.id, device_id: deviceId, plant_name: plantName });
+  var plantType=document.getElementById('device-type-select').value||null;
+  var insertData={user_id:currentUser.id,device_id:deviceId,plant_name:plantName};
+  if(plantType){
+    insertData.plant_type=plantType;
+    var p=PLANT_PRESETS[plantType];
+    if(p){insertData.dry_threshold=p.dry;insertData.wet_threshold=p.wet;}
+  }
+  var { error } = await sb.from('devices').insert(insertData);
   if (error) { showAuthError('device-error', error.message); return; }
 
   // Remove from pending_devices
@@ -733,6 +875,175 @@ async function checkNotifStatus(){
     document.getElementById('notif-btn-text').textContent='Notifications on';
     document.getElementById('notif-btn').style.background='var(--green-dim)';
   }
+}
+
+// ── Plant Switcher ────────────────────────────────────────────────────────────
+function renderPlantSwitcher(){
+  var el=document.getElementById('plant-switcher');
+  if(userDevices.length<=1){el.classList.remove('show');return;}
+  el.classList.add('show');
+  el.innerHTML=userDevices.map(function(d){
+    var active=d.device_id===activeDeviceId;
+    var pct=deviceMoisture[d.device_id];
+    var dotColor=pct==null?'var(--muted)':colorFor(pct);
+    return '<div class="plant-card'+(active?' active':'')+'" onclick="selectDevice(\''+d.device_id+'\',\''+(d.plant_name||'My Plant')+'\')">'
+      +'<div class="plant-card-name">'+(d.plant_name||'My Plant')+'</div>'
+      +'<div class="plant-card-row">'
+      +'<div class="plant-card-dot" style="background:'+dotColor+'"></div>'
+      +'<div class="plant-card-pct">'+(pct!=null?pct+'%':'—')+'</div>'
+      +'</div></div>';
+  }).join('');
+}
+
+// ── Plant Type Presets ────────────────────────────────────────────────────────
+async function applyPlantPreset(type){
+  if(!type||!calibratingDeviceId)return;
+  var p=PLANT_PRESETS[type];if(!p)return;
+  var {error}=await sb.from('devices').update({
+    plant_type:type,dry_threshold:p.dry,wet_threshold:p.wet
+  }).eq('device_id',calibratingDeviceId).eq('user_id',currentUser.id);
+  if(error){showToast('Could not save preset: '+error.message);return;}
+  var device=userDevices.find(function(d){return d.device_id===calibratingDeviceId;});
+  if(device){device.plant_type=type;device.dry_threshold=p.dry;device.wet_threshold=p.wet;}
+  document.getElementById('cal-dry-val').innerHTML=p.dry+' <span>ADC</span>';
+  document.getElementById('cal-wet-val').innerHTML=p.wet+' <span>ADC</span>';
+  showToast(p.name+' preset applied!',true);
+  updateCalibrationBanner();
+}
+
+// ── Watering Log ──────────────────────────────────────────────────────────────
+async function doMarkWatered(){
+  if(!activeDeviceId||!currentUser)return;
+  var {error}=await sb.from('watering_log').insert({user_id:currentUser.id,device_id:activeDeviceId,watered_at:new Date().toISOString()});
+  if(error){showToast('Could not save: '+error.message);return;}
+  lastWateredDate=new Date();
+  updateLastWateredLabel();
+  showToast('Watered! 💧',true);
+}
+async function fetchLastWatered(){
+  if(!activeDeviceId||!currentUser)return;
+  var {data}=await sb.from('watering_log').select('watered_at').eq('device_id',activeDeviceId).eq('user_id',currentUser.id).order('watered_at',{ascending:false}).limit(1);
+  lastWateredDate=data&&data.length?new Date(data[0].watered_at):null;
+  updateLastWateredLabel();
+}
+function updateLastWateredLabel(){
+  var el=document.getElementById('last-watered-label');
+  if(!lastWateredDate){el.style.display='none';return;}
+  var days=Math.floor((Date.now()-lastWateredDate.getTime())/(86400000));
+  var text=days===0?'Watered today':days===1?'Last watered yesterday':'Last watered '+days+' days ago';
+  el.textContent=text;el.style.display='block';
+}
+
+// ── History Screen ────────────────────────────────────────────────────────────
+function openHistory(){
+  if(!activeDeviceId)return;
+  var device=userDevices.find(function(d){return d.device_id===activeDeviceId;});
+  document.getElementById('history-device-label').textContent=device?(device.plant_name||device.device_id):'';
+  currentHistoryPeriod='24h';
+  ['24h','7d','30d'].forEach(function(p){
+    document.getElementById('tab-'+p).classList.toggle('active',p==='24h');
+  });
+  showScreen('history');
+  loadHistoryData('24h');
+}
+function switchHistoryTab(period){
+  currentHistoryPeriod=period;
+  ['24h','7d','30d'].forEach(function(p){
+    document.getElementById('tab-'+p).classList.toggle('active',p===period);
+  });
+  loadHistoryData(period);
+}
+async function loadHistoryData(period){
+  document.getElementById('history-chart-inner').innerHTML='<div class="history-empty">Loading…</div>';
+  document.getElementById('hist-avg').textContent='—';
+  document.getElementById('hist-dry-count').textContent='—';
+  var hours={'24h':24,'7d':168,'30d':720}[period];
+  var since=new Date(Date.now()-hours*3600000).toISOString();
+  var limit={'24h':300,'7d':500,'30d':500}[period];
+  var [{data:readings},{data:waterings}]=await Promise.all([
+    sb.from('readings').select('moisture,raw_adc,status,created_at').eq('device_id',activeDeviceId).gte('created_at',since).order('created_at').limit(limit),
+    sb.from('watering_log').select('watered_at').eq('device_id',activeDeviceId).eq('user_id',currentUser.id).gte('watered_at',since).order('watered_at')
+  ]);
+  if(!readings||!readings.length){
+    document.getElementById('history-chart-inner').innerHTML='<div class="history-empty">No data for this period</div>';
+    return;
+  }
+  var avg=Math.round(readings.reduce(function(s,r){return s+r.moisture;},0)/readings.length);
+  var dryCount=readings.filter(function(r){return r.status==='DRY';}).length;
+  document.getElementById('hist-avg').textContent=avg+'%';
+  document.getElementById('hist-dry-count').textContent=dryCount;
+  renderHistoryChart(readings,waterings||[]);
+  renderWateringList(waterings||[],readings);
+}
+function renderHistoryChart(data,wateringEvents){
+  var container=document.getElementById('history-chart-inner');
+  container.innerHTML='';
+  var W=container.parentElement.clientWidth-32;
+  var H=160;
+  var margin={top:10,right:10,bottom:24,left:32};
+  var iW=W-margin.left-margin.right;
+  var iH=H-margin.top-margin.bottom;
+  var times=data.map(function(d){return new Date(d.created_at);});
+  var xScale=d3.scaleTime().domain([times[0],times[times.length-1]]).range([0,iW]);
+  var yScale=d3.scaleLinear().domain([0,100]).range([iH,0]);
+  var svg=d3.select(container).append('svg')
+    .attr('width',W).attr('height',H);
+  var g=svg.append('g').attr('transform','translate('+margin.left+','+margin.top+')');
+  // Grid lines
+  g.selectAll('.gridline').data(yScale.ticks(4)).enter().append('line')
+    .attr('x1',0).attr('x2',iW)
+    .attr('y1',function(d){return yScale(d);}).attr('y2',function(d){return yScale(d);})
+    .attr('stroke','rgba(255,255,255,0.05)').attr('stroke-width',1);
+  // Watering event lines
+  wateringEvents.forEach(function(w){
+    var wx=xScale(new Date(w.watered_at));
+    g.append('line').attr('x1',wx).attr('x2',wx).attr('y1',0).attr('y2',iH)
+      .attr('stroke','rgba(74,173,255,0.5)').attr('stroke-width',1.5)
+      .attr('stroke-dasharray','4,3');
+  });
+  // Line segments colored by moisture
+  var line=d3.line().x(function(d,i){return xScale(times[i]);}).y(function(d){return yScale(d.moisture);}).curve(d3.curveMonotoneX);
+  for(var i=0;i<data.length-1;i++){
+    g.append('path').datum([data[i],data[i+1]])
+      .attr('fill','none')
+      .attr('stroke',colorFor(data[i].moisture))
+      .attr('stroke-width',2)
+      .attr('opacity',0.85)
+      .attr('d',d3.line().x(function(d,j){return xScale(new Date(d.created_at));}).y(function(d){return yScale(d.moisture);}).curve(d3.curveMonotoneX));
+  }
+  // X axis ticks
+  var tickCount={'24h':6,'7d':7,'30d':6}[currentHistoryPeriod]||6;
+  g.append('g').attr('transform','translate(0,'+iH+')').call(
+    d3.axisBottom(xScale).ticks(tickCount).tickFormat(function(d){
+      if(currentHistoryPeriod==='24h')return d3.timeFormat('%H:%M')(d);
+      return d3.timeFormat('%b %d')(d);
+    }).tickSize(3)
+  ).select('.domain').remove();
+  g.selectAll('.tick text').attr('fill','#555').attr('font-size','10').attr('font-family','DM Mono, monospace');
+  g.selectAll('.tick line').attr('stroke','#333');
+  // Y axis ticks
+  g.append('g').call(d3.axisLeft(yScale).ticks(4).tickFormat(function(d){return d+'%';}).tickSize(3))
+    .select('.domain').remove();
+  g.selectAll('.tick text').attr('fill','#555').attr('font-size','10').attr('font-family','DM Mono, monospace');
+}
+function renderWateringList(waterings,readings){
+  var listEl=document.getElementById('history-watering-list');
+  var rowsEl=document.getElementById('history-watering-rows');
+  if(!waterings.length){listEl.style.display='none';return;}
+  listEl.style.display='block';
+  rowsEl.innerHTML=waterings.slice().reverse().map(function(w){
+    var wt=new Date(w.watered_at);
+    // Find closest reading after watering to show moisture at time of watering
+    var closest=readings.reduce(function(prev,r){
+      return Math.abs(new Date(r.created_at)-wt)<Math.abs(new Date(prev.created_at)-wt)?r:prev;
+    },readings[0]);
+    var dateStr=wt.toLocaleDateString('en-GB',{day:'numeric',month:'short'});
+    var timeStr=wt.getHours()+':'+String(wt.getMinutes()).padStart(2,'0');
+    return '<div class="watering-row">'
+      +'<div><div style="font-size:14px;font-weight:700">💧 Watered</div><div class="watering-row-date">'+dateStr+' · '+timeStr+'</div></div>'
+      +(closest?'<div class="watering-row-moist" style="color:'+colorFor(closest.moisture)+'">'+closest.moisture+'%</div>':'')
+      +'</div>';
+  }).join('');
 }
 
 // ── WiFi Setup ────────────────────────────────────────────────────────────────

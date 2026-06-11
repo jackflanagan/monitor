@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0a0a0a">
+<meta name="description" content="Moist — smart soil moisture monitoring for your plants. Get real-time readings anywhere.">
+<title>Moist — Never kill a plant again</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Cabinet+Grotesk:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --green:#5aff7e;--green-dim:#1a3a22;--amber:#ffb830;--blue:#4aadff;
+    --bg:#0a0a0a;--surface:#141414;--surface2:#1c1c1c;--border:rgba(255,255,255,0.07);
+    --text:#f0f0f0;--muted:#666;
+    --font-head:'Cabinet Grotesk',sans-serif;--font-mono:'DM Mono',monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{background:var(--bg);color:var(--text);font-family:var(--font-head);overflow-x:hidden}
+
+  /* Nav */
+  nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:0 24px;height:60px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);background:rgba(10,10,10,0.9);backdrop-filter:blur(12px)}
+  .nav-logo{font-size:20px;font-weight:800;letter-spacing:-0.03em;text-decoration:none;color:var(--text)}
+  .nav-logo span{color:var(--green)}
+  .nav-links{display:flex;align-items:center;gap:28px}
+  .nav-links a{font-size:14px;color:var(--muted);text-decoration:none;transition:color 0.2s}
+  .nav-links a:hover{color:var(--text)}
+  .nav-cta{background:var(--green);color:#000;border:none;border-radius:10px;padding:9px 20px;font-family:var(--font-head);font-size:14px;font-weight:800;cursor:pointer;text-decoration:none;transition:opacity 0.2s}
+  .nav-cta:hover{opacity:0.9}
+
+  /* Sections */
+  section{max-width:1100px;margin:0 auto;padding:0 24px}
+
+  /* Hero */
+  .hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:80px 24px 60px;position:relative}
+  .hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 60% 50% at 50% 40%,rgba(90,255,126,0.07) 0%,transparent 70%);pointer-events:none}
+  .hero-eyebrow{display:inline-flex;align-items:center;gap:8px;background:var(--green-dim);border:1px solid rgba(90,255,126,0.2);border-radius:99px;padding:6px 14px;font-size:12px;font-family:var(--font-mono);color:var(--green);margin-bottom:28px}
+  .hero-eyebrow::before{content:'';width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);animation:pulse 2s infinite}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
+  .hero-title{font-size:clamp(42px,8vw,88px);font-weight:800;letter-spacing:-0.04em;line-height:1;margin-bottom:24px;max-width:800px}
+  .hero-title span{color:var(--green)}
+  .hero-sub{font-size:clamp(16px,2vw,20px);color:var(--muted);line-height:1.6;max-width:480px;margin:0 auto 40px}
+  .hero-actions{display:flex;gap:14px;flex-wrap:wrap;justify-content:center}
+  .btn-hero{display:inline-flex;align-items:center;gap:8px;background:var(--green);color:#000;border:none;border-radius:14px;padding:16px 32px;font-family:var(--font-head);font-size:16px;font-weight:800;cursor:pointer;text-decoration:none;transition:opacity 0.2s;letter-spacing:-0.01em}
+  .btn-hero:hover{opacity:0.9}
+  .btn-hero-ghost{display:inline-flex;align-items:center;gap:8px;background:none;color:var(--text);border:1px solid var(--border);border-radius:14px;padding:16px 32px;font-family:var(--font-head);font-size:16px;font-weight:700;cursor:pointer;text-decoration:none;transition:all 0.2s}
+  .btn-hero-ghost:hover{border-color:rgba(255,255,255,0.2)}
+  .hero-mock{margin-top:64px;background:var(--surface);border:1px solid var(--border);border-radius:28px;padding:28px;max-width:340px;width:100%;text-align:left;box-shadow:0 40px 80px rgba(0,0,0,0.6)}
+  .mock-header{font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);font-family:var(--font-mono);margin-bottom:6px}
+  .mock-plant{font-size:20px;font-weight:800;letter-spacing:-0.02em;margin-bottom:20px}
+  .mock-gauge{display:flex;flex-direction:column;align-items:center;margin-bottom:20px}
+  .mock-pct{font-size:52px;font-weight:800;color:var(--green);letter-spacing:-0.04em;line-height:1}
+  .mock-pct-label{font-size:12px;font-family:var(--font-mono);color:var(--muted);margin-top:4px}
+  .mock-pill{display:inline-flex;align-items:center;gap:7px;padding:7px 14px;border-radius:99px;font-size:12px;font-family:var(--font-mono);background:var(--green-dim);color:var(--green);margin-bottom:16px}
+  .mock-pill-dot{width:6px;height:6px;border-radius:50%;background:var(--green)}
+  .mock-bars{display:flex;align-items:flex-end;gap:4px;height:40px}
+  .mock-bar{flex:1;border-radius:2px 2px 0 0;background:var(--green);opacity:0.7}
+
+  /* How it works */
+  .how-it-works{padding:100px 24px;text-align:center}
+  .section-label{font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:var(--green);font-family:var(--font-mono);margin-bottom:14px}
+  .section-title{font-size:clamp(28px,4vw,44px);font-weight:800;letter-spacing:-0.03em;margin-bottom:16px}
+  .section-sub{font-size:16px;color:var(--muted);max-width:480px;margin:0 auto 60px;line-height:1.65}
+  .steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:20px;max-width:900px;margin:0 auto}
+  .step{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:28px;text-align:left;position:relative}
+  .step-num{width:36px;height:36px;border-radius:50%;background:var(--green-dim);border:1px solid rgba(90,255,126,0.2);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:var(--green);margin-bottom:20px;font-family:var(--font-mono)}
+  .step-icon{font-size:32px;margin-bottom:14px;display:block}
+  .step-title{font-size:17px;font-weight:800;letter-spacing:-0.01em;margin-bottom:8px}
+  .step-body{font-size:14px;color:var(--muted);line-height:1.65}
+
+  /* Features */
+  .features{padding:100px 24px}
+  .features-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;max-width:1000px;margin:0 auto}
+  .feature{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:24px}
+  .feature-icon{font-size:28px;margin-bottom:14px}
+  .feature-title{font-size:16px;font-weight:800;letter-spacing:-0.01em;margin-bottom:6px}
+  .feature-body{font-size:13px;color:var(--muted);line-height:1.65}
+
+  /* Pricing */
+  .pricing{padding:100px 24px;text-align:center}
+  .pricing-card{background:var(--surface);border:1px solid var(--border);border-radius:24px;padding:40px;max-width:400px;margin:0 auto}
+  .pricing-badge{display:inline-block;background:var(--green-dim);border:1px solid rgba(90,255,126,0.2);color:var(--green);font-size:11px;font-family:var(--font-mono);font-weight:500;letter-spacing:0.08em;padding:4px 12px;border-radius:99px;margin-bottom:20px}
+  .pricing-price{font-size:64px;font-weight:800;letter-spacing:-0.04em;line-height:1;color:var(--green);margin-bottom:6px}
+  .pricing-period{font-size:14px;color:var(--muted);font-family:var(--font-mono);margin-bottom:28px}
+  .pricing-features{list-style:none;text-align:left;margin-bottom:32px}
+  .pricing-features li{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);font-size:14px;color:var(--muted)}
+  .pricing-features li:last-child{border-bottom:none}
+  .pricing-features li::before{content:'✓';color:var(--green);font-weight:800;font-size:13px;flex-shrink:0}
+  .btn-pricing{display:block;width:100%;padding:16px;background:var(--green);color:#000;border:none;border-radius:14px;font-family:var(--font-head);font-size:16px;font-weight:800;cursor:pointer;text-decoration:none;text-align:center;transition:opacity 0.2s}
+  .btn-pricing:hover{opacity:0.9}
+  .pricing-note{font-size:12px;color:var(--muted);font-family:var(--font-mono);margin-top:14px}
+
+  /* Footer */
+  footer{border-top:1px solid var(--border);padding:32px 24px;text-align:center;font-size:13px;color:var(--muted);font-family:var(--font-mono)}
+  footer a{color:var(--muted);text-decoration:none;transition:color 0.2s}
+  footer a:hover{color:var(--text)}
+  .footer-inner{max-width:1100px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
+
+  @media(max-width:600px){
+    .nav-links{display:none}
+    .hero-title{font-size:42px}
+    .footer-inner{justify-content:center}
+  }
+</style>
+</head>
+<body>
+
+<!-- Nav -->
+<nav>
+  <a href="#" class="nav-logo">Moi<span>st</span></a>
+  <div class="nav-links">
+    <a href="#how-it-works">How it works</a>
+    <a href="#features">Features</a>
+    <a href="#pricing">Pricing</a>
+  </div>
+  <a href="/index.html" class="nav-cta">Get started →</a>
+</nav>
+
+<!-- Hero -->
+<div class="hero">
+  <div class="hero-eyebrow">Free during beta</div>
+  <h1 class="hero-title">Never kill a<br><span>plant again</span></h1>
+  <p class="hero-sub">Moist monitors your plants' soil moisture in real time — from anywhere. Get alerts before they dry out.</p>
+  <div class="hero-actions">
+    <a href="/index.html" class="btn-hero">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      Start monitoring free
+    </a>
+    <a href="#how-it-works" class="btn-hero-ghost">How it works</a>
+  </div>
+  <!-- Mini app mockup -->
+  <div class="hero-mock">
+    <div class="mock-header">Moist</div>
+    <div class="mock-plant">Living Room Fern</div>
+    <div class="mock-gauge">
+      <div class="mock-pct">62%</div>
+      <div class="mock-pct-label">moisture</div>
+    </div>
+    <div style="display:flex;justify-content:center;margin-bottom:16px">
+      <div class="mock-pill"><div class="mock-pill-dot"></div>Soil is OK</div>
+    </div>
+    <div class="mock-bars">
+      <div class="mock-bar" style="height:55%"></div>
+      <div class="mock-bar" style="height:48%"></div>
+      <div class="mock-bar" style="height:60%"></div>
+      <div class="mock-bar" style="height:70%"></div>
+      <div class="mock-bar" style="height:65%"></div>
+      <div class="mock-bar" style="height:58%"></div>
+      <div class="mock-bar" style="height:62%"></div>
+      <div class="mock-bar" style="height:67%"></div>
+      <div class="mock-bar" style="height:72%"></div>
+      <div class="mock-bar" style="height:62%"></div>
+    </div>
+  </div>
+</div>
+
+<!-- How it works -->
+<div id="how-it-works">
+  <div class="how-it-works">
+    <div class="section-label">How it works</div>
+    <h2 class="section-title">Set up in minutes</h2>
+    <p class="section-sub">Three simple steps and your plants are monitored 24/7.</p>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <span class="step-icon">🔌</span>
+        <div class="step-title">Plug in your sensor</div>
+        <div class="step-body">Connect your ESP32 moisture sensor to power. The LED blinks to show it's ready to configure.</div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <span class="step-icon">📶</span>
+        <div class="step-title">Connect to WiFi</div>
+        <div class="step-body">Join the <strong style="color:var(--text)">Moist Setup</strong> hotspot from your phone and enter your home WiFi details at 192.168.4.1.</div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <span class="step-icon">📱</span>
+        <div class="step-title">Monitor from anywhere</div>
+        <div class="step-body">Open the Moist app on any device. Watch your soil moisture update in real time — wherever you are.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Features -->
+<div id="features">
+  <div class="features">
+    <div style="text-align:center;margin-bottom:60px">
+      <div class="section-label">Features</div>
+      <h2 class="section-title">Everything your plants need</h2>
+    </div>
+    <div class="features-grid">
+      <div class="feature">
+        <div class="feature-icon">⚡</div>
+        <div class="feature-title">Live readings</div>
+        <div class="feature-body">Moisture updates every 10 seconds. See the exact percentage, raw ADC value, and status at a glance.</div>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">🔔</div>
+        <div class="feature-title">Push notifications</div>
+        <div class="feature-body">Get an alert on your phone the moment soil dips below your threshold — before your plant feels it.</div>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">🌿</div>
+        <div class="feature-title">Multiple plants</div>
+        <div class="feature-body">Add unlimited devices and switch between them with a tap. Each plant gets its own dashboard.</div>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">🌍</div>
+        <div class="feature-title">Works anywhere</div>
+        <div class="feature-body">Data syncs through Supabase. Check your plants while you're at work, travelling, or anywhere.</div>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">📊</div>
+        <div class="feature-title">History charts</div>
+        <div class="feature-body">View 24-hour, 7-day, and 30-day moisture trends with a beautiful D3 line chart.</div>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">🎯</div>
+        <div class="feature-title">Plant profiles</div>
+        <div class="feature-body">Choose from preset profiles — Succulent, Cactus, Tropical, Herb, Fern — or calibrate your own thresholds.</div>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">💧</div>
+        <div class="feature-title">Watering log</div>
+        <div class="feature-body">Mark when you water each plant and track how long it stays hydrated over time.</div>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">🔋</div>
+        <div class="feature-title">Battery mode</div>
+        <div class="feature-body">Enable deep sleep on your ESP32 to run on a small LiPo battery for weeks between charges.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Pricing -->
+<div id="pricing">
+  <div class="pricing">
+    <div class="section-label">Pricing</div>
+    <h2 class="section-title">Simple pricing</h2>
+    <p class="section-sub" style="margin-bottom:40px">Free while we're in beta. No credit card required.</p>
+    <div class="pricing-card">
+      <div class="pricing-badge">Beta</div>
+      <div class="pricing-price">Free</div>
+      <div class="pricing-period">during beta · no card needed</div>
+      <ul class="pricing-features">
+        <li>Unlimited devices</li>
+        <li>Real-time moisture readings</li>
+        <li>Push notifications</li>
+        <li>30-day history charts</li>
+        <li>Watering log</li>
+        <li>Plant profiles &amp; calibration</li>
+        <li>PWA + Android app</li>
+      </ul>
+      <a href="/index.html" class="btn-pricing">Get started free →</a>
+      <div class="pricing-note">No spam. No lock-in. Cancel whenever.</div>
+    </div>
+  </div>
+</div>
+
+<!-- Footer -->
+<footer>
+  <div class="footer-inner">
+    <span>© 2026 Moist. Built with ❤️ for plants.</span>
+    <span>
+      <a href="/privacy.html">Privacy policy</a>
+      &nbsp;·&nbsp;
+      <a href="/index.html">Open app</a>
+    </span>
+  </div>
+</footer>
+
+</body>
+</html>
