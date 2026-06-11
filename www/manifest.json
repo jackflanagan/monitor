@@ -2,6 +2,7 @@
   "name": "Moist",
   "short_name": "Moist",
   "description": "Soil moisture monitor for your plants",
+  "id": "com.plantmoist.app",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#0a0a0a",
