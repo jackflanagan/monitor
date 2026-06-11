@@ -13,6 +13,7 @@
 <link rel="icon" type="image/svg+xml" href="/icon.svg">
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Cabinet+Grotesk:wght@400;500;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/src/utils.js"></script>
 <style>
   :root {
     --green:#5aff7e;--green-dim:#1a3a22;--amber:#ffb830;--amber-dim:#3a2a0a;
@@ -425,8 +426,6 @@ async function fetchReadings(){
   document.getElementById('last-updated').textContent='Last reading '+t.getHours()+':'+String(t.getMinutes()).padStart(2,'0')+':'+String(t.getSeconds()).padStart(2,'0');
 }
 
-function colorFor(v){return v<30?'#ffb830':v>=70?'#4aadff':'#5aff7e'}
-
 function updateGauge(moisture,raw,status){
   var color=colorFor(moisture);
   var arc=document.getElementById('gauge-arc');
@@ -520,13 +519,6 @@ async function doAddDevice() {
 }
 
 var VAPID_PUBLIC_KEY='BLWgidrw22eOEGx4fX1TbdsqL3pv5rJEipk-vKEhucChzgIHEta4yy6hjeyi7ge4Djjv2_WVPDttGz5ytCaMvzE';
-
-function urlBase64ToUint8Array(base64String){
-  var padding='='.repeat((4-base64String.length%4)%4);
-  var base64=(base64String+padding).replace(/-/g,'+').replace(/_/g,'/');
-  var rawData=atob(base64);
-  return Uint8Array.from([...rawData].map(function(c){return c.charCodeAt(0);}));
-}
 
 async function enableNotifications(){
   var btn=document.getElementById('notif-btn');
