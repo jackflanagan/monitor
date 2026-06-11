@@ -338,6 +338,9 @@
         <button class="icon-btn" onclick="showScreen('add-device')" title="Add device">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         </button>
+        <button class="icon-btn" onclick="openSettings()" title="Settings">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        </button>
         <button class="icon-btn" onclick="doSignOut()" title="Sign out">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
         </button>
@@ -509,6 +512,32 @@
         <option value="fern">Fern</option>
       </select>
     </div>
+  </div>
+</div>
+
+<div id="screen-settings" class="screen">
+  <div class="calibrate-wrap">
+    <button class="back-btn" onclick="showScreen('dashboard')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+      Back
+    </button>
+    <div class="auth-title" style="margin-bottom:6px">Settings</div>
+    <div class="auth-sub" style="margin-bottom:24px" id="settings-device-label">Device settings</div>
+    <div class="calibrate-section">
+      <div class="calibrate-label">Data retention</div>
+      <div style="font-size:13px;color:var(--muted);font-family:var(--font-mono);margin-bottom:14px;line-height:1.6">How long to keep readings. Older data is downsampled to one reading per hour to save space.</div>
+      <div class="field" style="margin-bottom:0">
+        <label>Keep readings for</label>
+        <select id="retention-select">
+          <option value="30">30 days</option>
+          <option value="60">60 days</option>
+          <option value="90" selected>90 days</option>
+          <option value="180">180 days</option>
+          <option value="365">1 year</option>
+        </select>
+      </div>
+    </div>
+    <button class="btn-primary" onclick="saveSettings()" style="margin-top:20px">Save settings</button>
   </div>
 </div>
 
@@ -1044,6 +1073,25 @@ function renderWateringList(waterings,readings){
       +(closest?'<div class="watering-row-moist" style="color:'+colorFor(closest.moisture)+'">'+closest.moisture+'%</div>':'')
       +'</div>';
   }).join('');
+}
+
+// ── Settings ──────────────────────────────────────────────────────────────────
+function openSettings(){
+  var device=userDevices.find(function(d){return d.device_id===activeDeviceId;});
+  if(!device)return;
+  document.getElementById('settings-device-label').textContent=device.plant_name||device.device_id;
+  var sel=document.getElementById('retention-select');
+  sel.value=String(device.retention_days||90);
+  showScreen('settings');
+}
+async function saveSettings(){
+  var retentionDays=parseInt(document.getElementById('retention-select').value,10);
+  var {error}=await sb.from('devices').update({retention_days:retentionDays}).eq('device_id',activeDeviceId).eq('user_id',currentUser.id);
+  if(error){showToast('Could not save: '+error.message);return;}
+  var device=userDevices.find(function(d){return d.device_id===activeDeviceId;});
+  if(device)device.retention_days=retentionDays;
+  showToast('Settings saved!',true);
+  showScreen('dashboard');
 }
 
 // ── WiFi Setup ────────────────────────────────────────────────────────────────

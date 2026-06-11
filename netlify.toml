@@ -25,3 +25,9 @@
   from = "/privacy"
   to   = "/privacy.html"
   status = 200
+
+# Health endpoint
+[[redirects]]
+  from = "/health"
+  to   = "/.netlify/functions/health"
+  status = 200
