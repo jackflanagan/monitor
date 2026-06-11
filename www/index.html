@@ -361,8 +361,9 @@ async function loadDashboard(){
 
 async function loadDevices(){
   for(var attempt=0;attempt<3;attempt++){
-    var {data,error}=await sb.from('devices').select('*').order('created_at');
-    if(!error&&data){userDevices=data;if(data.length>0)return;}
+    var {data,error}=await sb.from('devices').select('*').eq('user_id',currentUser.id).order('created_at');
+    if(error){console.warn('loadDevices attempt '+(attempt+1)+' error:',error.message);}
+    else if(data){userDevices=data;if(data.length>0)return;}
     if(attempt<2)await new Promise(function(r){setTimeout(r,1000);});
   }
 }
