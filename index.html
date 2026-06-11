@@ -526,7 +526,8 @@ async function enableNotifications(){
     showToast('Push notifications not supported in this browser');return;
   }
   try {
-    var reg=await navigator.serviceWorker.register('/sw.js');
+    await navigator.serviceWorker.register('/sw.js');
+    var reg=await navigator.serviceWorker.ready;
     var permission=await Notification.requestPermission();
     if(permission!=='granted'){showToast('Notification permission denied');return;}
     txt.textContent='Saving...';btn.disabled=true;
@@ -539,13 +540,14 @@ async function enableNotifications(){
       subscription:sub.toJSON()
     });
     btn.disabled=false;
-    if(error){txt.textContent='Enable notifications';showToast('Could not save subscription');return;}
+    if(error){txt.textContent='Enable notifications';showToast('Could not save subscription: '+error.message);return;}
     txt.textContent='Notifications on';
     btn.style.background='var(--green-dim)';
     showToast('Notifications enabled!',true);
   } catch(e){
     btn.disabled=false;txt.textContent='Enable notifications';
-    showToast('Could not enable notifications');
+    console.error('enableNotifications error:',e);
+    showToast('Error: '+e.message);
   }
 }
 
