@@ -17,9 +17,12 @@
 <script src="/src/utils.js"></script>
 <style>
   :root {
-    --green:#5aff7e;--green-dim:#1a3a22;--amber:#ffb830;--amber-dim:#3a2a0a;
-    --blue:#4aadff;--blue-dim:#0a1e3a;--bg:#0a0a0a;--surface:#141414;
-    --surface2:#1c1c1c;--border:rgba(255,255,255,0.07);--text:#f0f0f0;--muted:#666;
+    --green:#3dff82;--green-dim:#062a18;         /* neon lime — CTAs, logo, links */
+    --green2:#00dfa2;--green2-dim:#052e24;        /* teal-emerald — status, tabs, pills */
+    --amber:#ffca3a;--amber-dim:#2e1e00;
+    --blue:#4db8ff;--blue-dim:#071830;
+    --bg:#080d09;--surface:#0e1d10;--surface2:#152018;
+    --border:rgba(61,255,130,0.1);--text:#f2fff5;--muted:#527560;
     --font-head:'Cabinet Grotesk',sans-serif;--font-mono:'DM Mono',monospace;
   }
   *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
@@ -67,7 +70,7 @@
   .header-plant{font-size:22px;font-weight:800;letter-spacing:-0.02em}
   .conn-indicator{display:flex;align-items:center;gap:6px;font-size:11px;font-family:var(--font-mono);color:var(--muted);margin-top:4px}
   .conn-dot{width:6px;height:6px;border-radius:50%;background:var(--muted);transition:background 0.4s}
-  .conn-dot.live{background:var(--green);box-shadow:0 0 8px var(--green);animation:pulse 2s infinite}
+  .conn-dot.live{background:var(--green2);box-shadow:0 0 8px var(--green2);animation:pulse 2s infinite}
   .conn-dot.error{background:#ff4a4a}
   @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
   .header-btns{display:flex;gap:8px}
@@ -76,7 +79,7 @@
   .icon-btn svg{width:16px;height:16px}
 
   .gauge-card{margin:0 16px 16px;background:var(--surface);border:1px solid var(--border);border-radius:24px;padding:28px 24px 24px;display:flex;flex-direction:column;align-items:center;position:relative;overflow:hidden}
-  .gauge-card::before{content:'';position:absolute;top:-60px;left:50%;transform:translateX(-50%);width:200px;height:200px;border-radius:50%;background:radial-gradient(circle,rgba(90,255,126,0.06) 0%,transparent 70%);pointer-events:none;transition:background 0.6s}
+  .gauge-card::before{content:'';position:absolute;top:-60px;left:50%;transform:translateX(-50%);width:200px;height:200px;border-radius:50%;background:radial-gradient(circle,rgba(0,223,162,0.08) 0%,transparent 70%);pointer-events:none;transition:background 0.6s}
   .gauge-card.dry::before{background:radial-gradient(circle,rgba(255,184,48,0.08) 0%,transparent 70%)}
   .gauge-card.wet::before{background:radial-gradient(circle,rgba(74,173,255,0.08) 0%,transparent 70%)}
   .gauge-wrap{position:relative;width:200px;height:115px;margin-bottom:8px}
@@ -85,7 +88,7 @@
   .gauge-pct{position:absolute;bottom:-4px;width:100%;text-align:center;font-size:48px;font-weight:800;letter-spacing:-0.04em;transition:color 0.6s}
   .status-pill{display:inline-flex;align-items:center;gap:7px;padding:7px 16px;border-radius:99px;font-size:13px;font-weight:500;font-family:var(--font-mono);margin-top:16px;transition:all 0.4s}
   .pill-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
-  .pill-ok{background:var(--green-dim);color:var(--green)}.pill-ok .pill-dot{background:var(--green)}
+  .pill-ok{background:var(--green2-dim);color:var(--green2)}.pill-ok .pill-dot{background:var(--green2)}
   .pill-dry{background:var(--amber-dim);color:var(--amber)}.pill-dry .pill-dot{background:var(--amber)}
   .pill-wet{background:var(--blue-dim);color:var(--blue)}.pill-wet .pill-dot{background:var(--blue)}
 
@@ -127,14 +130,14 @@
 
   .loading-screen{display:flex;align-items:center;justify-content:center;min-height:100vh}
   .loading-dot{width:8px;height:8px;border-radius:50%;background:var(--green);animation:ldot 1s ease-in-out infinite;margin:0 4px}
-  .loading-dot:nth-child(2){animation-delay:0.15s}
-  .loading-dot:nth-child(3){animation-delay:0.3s}
+  .loading-dot:nth-child(2){animation-delay:0.15s;background:var(--green2)}
+  .loading-dot:nth-child(3){animation-delay:0.3s;background:var(--green)}
   @keyframes ldot{0%,80%,100%{opacity:0.2;transform:scale(0.8)}40%{opacity:1;transform:scale(1)}}
 
   /* WiFi Setup */
   .setup-steps{display:flex;flex-direction:column;gap:12px;margin-bottom:28px}
   .setup-step{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:18px;display:flex;gap:14px;align-items:flex-start}
-  .setup-step-num{width:28px;height:28px;border-radius:50%;background:var(--green-dim);color:var(--green);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:12px;flex-shrink:0;font-family:var(--font-mono)}
+  .setup-step-num{width:28px;height:28px;border-radius:50%;background:var(--green2-dim);color:var(--green2);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:12px;flex-shrink:0;font-family:var(--font-mono)}
   .setup-step-text{font-size:13px;line-height:1.7;color:#b0b0b0}
   .setup-step-text strong{color:var(--text);display:block;margin-bottom:3px;font-size:14px}
   .setup-link{color:var(--green);text-decoration:underline;cursor:pointer;font-family:var(--font-mono)}
@@ -150,7 +153,7 @@
   .onboard-body{font-size:15px;color:var(--muted);line-height:1.65}
   .onboard-dots{display:flex;gap:6px;margin-top:36px}
   .onboard-dot{width:6px;height:6px;border-radius:50%;background:var(--border);transition:all 0.3s}
-  .onboard-dot.active{background:var(--green);width:18px;border-radius:3px}
+  .onboard-dot.active{background:var(--green2);width:18px;border-radius:3px}
   .onboard-nav{display:flex;justify-content:flex-end;margin-top:20px}
   .onboard-next{background:var(--green);color:#000;border:none;border-radius:14px;padding:14px 28px;font-family:var(--font-head);font-size:15px;font-weight:800;cursor:pointer;transition:opacity 0.2s}
   .onboard-next:hover{opacity:0.9}
@@ -181,11 +184,11 @@
   .plant-switcher.show{display:flex}
   .plant-switcher::-webkit-scrollbar{display:none}
   .plant-card{flex-shrink:0;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:12px 14px;cursor:pointer;transition:all 0.2s;min-width:110px;max-width:140px}
-  .plant-card.active{border-color:var(--green);background:var(--green-dim)}
+  .plant-card.active{border-color:var(--green2);background:var(--green2-dim)}
   .plant-card-name{font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:6px}
   .plant-card-row{display:flex;align-items:center;gap:6px}
   .plant-card-pct{font-size:12px;font-family:var(--font-mono);color:var(--muted)}
-  .plant-card.active .plant-card-pct{color:var(--green)}
+  .plant-card.active .plant-card-pct{color:var(--green2)}
   .plant-card-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;background:var(--muted)}
 
   /* Watering */
@@ -210,7 +213,7 @@
   .history-tab:first-child{border-radius:10px 0 0 10px}
   .history-tab:last-child{border-radius:0 10px 10px 0}
   .history-tab+.history-tab{border-left:none}
-  .history-tab.active{background:var(--green-dim);border-color:var(--green);color:var(--green)}
+  .history-tab.active{background:var(--green2-dim);border-color:var(--green2);color:var(--green2)}
   .history-chart-wrap{margin:0 16px;background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:20px 16px 12px;overflow:hidden;position:relative}
   .history-stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:10px 16px 0}
   .history-stat{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px}
@@ -300,8 +303,8 @@
     </div>
 
     <div id="found-state" style="display:none;">
-      <div style="background:#1a3a22;border:1px solid #3B6D11;border-radius:12px;padding:16px;margin-bottom:20px;">
-        <div style="font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:#639922;font-family:var(--font-mono);margin-bottom:6px;">Device found</div>
+      <div style="background:var(--green2-dim);border:1px solid rgba(0,223,162,0.3);border-radius:12px;padding:16px;margin-bottom:20px;">
+        <div style="font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--green2);font-family:var(--font-mono);margin-bottom:6px;">Device found</div>
         <div style="font-family:var(--font-mono);font-size:13px;color:var(--green);" id="found-device-id"></div>
       </div>
       <div class="auth-error" id="device-error"></div>
@@ -364,7 +367,7 @@
       <div class="gauge-wrap">
         <svg viewBox="0 0 200 115" xmlns="http://www.w3.org/2000/svg">
           <path d="M20,105 A80,80 0 0,1 180,105" fill="none" stroke="#1c1c1c" stroke-width="12" stroke-linecap="round"/>
-          <path id="gauge-arc" d="M20,105 A80,80 0 0,1 180,105" fill="none" stroke="#5aff7e" stroke-width="12" stroke-linecap="round" stroke-dasharray="251" stroke-dashoffset="251"/>
+          <path id="gauge-arc" d="M20,105 A80,80 0 0,1 180,105" fill="none" stroke="#00dfa2" stroke-width="12" stroke-linecap="round" stroke-dasharray="251" stroke-dashoffset="251"/>
         </svg>
         <div class="gauge-pct" id="gauge-pct" style="color:var(--muted)">--%</div>
       </div>
