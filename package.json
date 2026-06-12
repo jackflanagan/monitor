@@ -4,6 +4,7 @@
   "description": "Moist — soil moisture monitor PWA wrapped as Android app",
   "private": true,
   "scripts": {
+    "build": "mkdir -p public && cp index.html landing.html health.json manifest.json icon.png icon.svg sw.js _headers _redirects public/ && cp privacy.html public/ 2>/dev/null; mkdir -p public/src && cp src/utils.js public/src/ && echo Build complete",
     "test": "jest",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
