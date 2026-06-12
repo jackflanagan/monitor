@@ -16,10 +16,34 @@
     --surface: #141414;
     --surface2: #1c1c1c;
     --border: rgba(255,255,255,0.07);
+    --border-hover: rgba(255,255,255,0.2);
     --text: #f0f0f0;
     --muted: #666;
     --font-head: 'Cabinet Grotesk', sans-serif;
     --font-mono: 'DM Mono', monospace;
+    --nav-bg: rgba(10,10,10,0.88);
+    --phone-body: #111;
+    --phone-notch: #000;
+    --phone-notch-bar: #1c1c1c;
+    --phone-screen: #0a0a0a;
+    --pricing-featured: #0f1f12;
+  }
+  html[data-theme="light"] {
+    --green: #00a83c;
+    --green-dim: #d4f5e3;
+    --bg: #f9fafb;
+    --surface: #ffffff;
+    --surface2: #f0f4f1;
+    --border: rgba(0,0,0,0.08);
+    --border-hover: rgba(0,0,0,0.15);
+    --text: #0d1a0f;
+    --muted: #6b7c71;
+    --nav-bg: rgba(249,250,251,0.92);
+    --phone-body: #e0e0e0;
+    --phone-notch: #c8c8c8;
+    --phone-notch-bar: #b0b0b0;
+    --phone-screen: #f9fafb;
+    --pricing-featured: #e8f5ed;
   }
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   html { scroll-behavior: smooth; }
@@ -31,7 +55,7 @@
     height: 60px; padding: 0 24px;
     display: flex; align-items: center; justify-content: space-between;
     border-bottom: 1px solid var(--border);
-    background: rgba(10,10,10,0.88); backdrop-filter: blur(14px);
+    background: var(--nav-bg); backdrop-filter: blur(14px);
   }
   .nav-logo { font-size: 20px; font-weight: 900; letter-spacing: -0.03em; color: var(--text); text-decoration: none; }
   .nav-logo span { color: var(--green); }
@@ -97,21 +121,21 @@
     border-radius: 13px; padding: 15px 30px; font-family: var(--font-head); font-size: 15px; font-weight: 700;
     cursor: pointer; text-decoration: none; transition: border-color 0.2s;
   }
-  .btn-ghost:hover { border-color: rgba(255,255,255,0.2); }
+  .btn-ghost:hover { border-color: var(--border-hover); }
 
   /* Phone mockup */
   .phone-wrap { display: flex; justify-content: center; align-items: center; position: relative; }
   .phone {
-    width: 240px; background: #111; border-radius: 36px; padding: 12px;
+    width: 240px; background: var(--phone-body); border-radius: 36px; padding: 12px;
     box-shadow: 0 0 0 1px rgba(255,255,255,0.1), 0 40px 80px rgba(0,0,0,0.7), 0 0 60px rgba(90,255,126,0.08);
     position: relative;
   }
   .phone-notch {
-    width: 80px; height: 22px; background: #000; border-radius: 0 0 16px 16px;
+    width: 80px; height: 22px; background: var(--phone-notch); border-radius: 0 0 16px 16px;
     margin: 0 auto 10px; display: flex; align-items: center; justify-content: center;
   }
-  .phone-notch::after { content: ''; width: 50px; height: 4px; background: #1c1c1c; border-radius: 2px; }
-  .phone-screen { background: #0a0a0a; border-radius: 26px; overflow: hidden; padding: 16px 14px 20px; }
+  .phone-notch::after { content: ''; width: 50px; height: 4px; background: var(--phone-notch-bar); border-radius: 2px; }
+  .phone-screen { background: var(--phone-screen); border-radius: 26px; overflow: hidden; padding: 16px 14px 20px; }
   .mock-header { font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); font-family: var(--font-mono); margin-bottom: 3px; }
   .mock-plant { font-size: 15px; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 16px; }
   .mock-gauge-wrap { display: flex; flex-direction: column; align-items: center; margin-bottom: 14px; }
@@ -242,7 +266,7 @@
     background: var(--surface2); border: 1px solid var(--border); border-radius: 24px;
     padding: 36px 32px;
   }
-  .pricing-card.featured { border-color: rgba(90,255,126,0.25); background: #0f1f12; }
+  .pricing-card.featured { border-color: rgba(90,255,126,0.25); background: var(--pricing-featured); }
   .pricing-badge {
     display: inline-block; background: var(--green-dim); border: 1px solid rgba(90,255,126,0.25);
     color: var(--green); font-size: 11px; font-family: var(--font-mono); letter-spacing: 0.08em;
@@ -273,7 +297,7 @@
   .btn-pricing.outline {
     background: none; color: var(--muted); border: 1px solid var(--border);
   }
-  .btn-pricing.outline:hover { border-color: rgba(255,255,255,0.2); color: var(--text); }
+  .btn-pricing.outline:hover { border-color: var(--border-hover); color: var(--text); }
 
   /* ── Footer ──────────────────────────────────────── */
   footer {
@@ -325,7 +349,13 @@
     <a href="#sensor">The sensor</a>
     <a href="#pricing">Pricing</a>
   </div>
-  <a href="/index.html" class="nav-cta">Get started →</a>
+  <div style="display:flex;align-items:center;gap:12px">
+    <button id="theme-btn" onclick="toggleTheme()" title="Toggle theme" style="width:36px;height:36px;border-radius:50%;border:1px solid var(--border);background:var(--surface);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--muted);transition:all 0.2s;flex-shrink:0">
+      <svg id="theme-icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+      <svg id="theme-icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;display:none"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+    </button>
+    <a href="/index.html" class="nav-cta">Get started →</a>
+  </div>
 </nav>
 
 <!-- ── Hero ─────────────────────────────────────────── -->
@@ -603,6 +633,21 @@ async function joinWaitlist() {
 document.getElementById('waitlist-email').addEventListener('keydown', function(e) {
   if (e.key === 'Enter') joinWaitlist();
 });
+
+function applyTheme(theme) {
+  document.documentElement.setAttribute('data-theme', theme);
+  var sun = document.getElementById('theme-icon-sun');
+  var moon = document.getElementById('theme-icon-moon');
+  if (sun && moon) { sun.style.display = theme === 'light' ? 'none' : ''; moon.style.display = theme === 'light' ? '' : 'none'; }
+  var meta = document.querySelector('meta[name="theme-color"]');
+  if (meta) meta.setAttribute('content', theme === 'light' ? '#f9fafb' : '#0a0a0a');
+}
+function toggleTheme() {
+  var next = document.documentElement.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+  localStorage.setItem('moist_theme', next);
+  applyTheme(next);
+}
+applyTheme(localStorage.getItem('moist_theme') || 'dark');
 </script>
 </body>
 </html>
