@@ -25,10 +25,10 @@ BH = 45;   // height (Z)
 BD = 40;   // depth  (Y)  — front is −Y
 
 // ── Eye parameters ────────────────────────────────
-EYE_R = 9;          // eye sphere radius
-EYE_X = 13;         // horizontal offset from centre
-EYE_Y = -BD * 0.1;  // slightly forward of body centre
-EYE_Z = BH/2 - 3;   // near top of head
+EYE_R = 13;         // eye sphere radius
+EYE_X = 14;         // horizontal offset from centre
+EYE_Y = -BD * 0.15; // slightly forward of body centre
+EYE_Z = BH/2 + 2;   // proud of the top of the head
 
 // ── Spike ─────────────────────────────────────────
 SP_LEN = 60;  // length below body
@@ -62,8 +62,22 @@ module eye_bump(sx) {
 
 // Cut flat circular face on top of each eye (for sticker / decal)
 module eye_flat_cut(sx) {
-    translate([sx * EYE_X, EYE_Y, EYE_Z + EYE_R - 2.5])
-        cylinder(r = EYE_R * 0.82, h = 8);
+    translate([sx * EYE_X, EYE_Y, EYE_Z + EYE_R - 3])
+        cylinder(r = EYE_R * 0.80, h = 8);
+}
+
+// Iris groove — shallow ring around the pupil for a painted iris effect
+module iris_groove(sx) {
+    translate([sx * EYE_X, EYE_Y - EYE_R * 0.12, EYE_Z + EYE_R - 3])
+    scale([1.95, 0.88, 1])
+        cylinder(r = EYE_R * 0.38, h = 1.8);
+}
+
+// Pupil — wide horizontal oval, deep (classic frog horizontal slit pupil)
+module pupil(sx) {
+    translate([sx * EYE_X, EYE_Y - EYE_R * 0.12, EYE_Z + EYE_R - 3])
+    scale([1.6, 0.62, 1])
+        cylinder(r = EYE_R * 0.36, h = 5.5);
 }
 
 // Spike: rectangular cross-section at top, tapers to point
@@ -147,4 +161,8 @@ difference() {
     smile_groove();  // curved smile line
     eye_flat_cut( 1); // flat decal face — right eye
     eye_flat_cut(-1); // flat decal face — left eye
+    iris_groove( 1);  // shallow iris ring — right eye
+    iris_groove(-1);  // shallow iris ring — left eye
+    pupil( 1);        // deep horizontal oval pupil — right eye
+    pupil(-1);        // deep horizontal oval pupil — left eye
 }
