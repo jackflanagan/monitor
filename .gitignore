@@ -2,3 +2,18 @@ node_modules/
 .DS_Store
 *.keystore
 *.jks
+
+# 3D design files (not part of web deploy)
+frog_sensor.stl
+frog_sensor.scad
+frog_sensor_render.html
+build_preview.js
+
+# Android app (separate project)
+android/
+
+# Netlify local state
+.netlify/
+
+# Test artifacts
+test-results/
