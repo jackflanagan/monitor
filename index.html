@@ -17,12 +17,12 @@
 <script src="/src/utils.js"></script>
 <style>
   :root {
-    --green:#3dff82;--green-dim:#062a18;         /* neon lime — CTAs, logo, links */
-    --green2:#00dfa2;--green2-dim:#052e24;        /* teal-emerald — status, tabs, pills */
-    --amber:#ffca3a;--amber-dim:#2e1e00;
-    --blue:#4db8ff;--blue-dim:#071830;
-    --bg:#080d09;--surface:#0e1d10;--surface2:#152018;
-    --border:rgba(61,255,130,0.1);--text:#f2fff5;--muted:#527560;
+    --green:#2dff6e;--green-dim:#082814;         /* electric lime — CTAs, logo, links */
+    --green2:#00ffcc;--green2-dim:#003d2e;        /* electric mint — status, tabs, pills */
+    --amber:#ffd500;--amber-dim:#2a2000;
+    --blue:#00d4ff;--blue-dim:#00263d;
+    --bg:#0d1f10;--surface:#162a1a;--surface2:#1f3825;
+    --border:rgba(45,255,110,0.2);--text:#ffffff;--muted:#7dbc8e;
     --font-head:'Cabinet Grotesk',sans-serif;--font-mono:'DM Mono',monospace;
   }
   *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
@@ -303,7 +303,7 @@
     </div>
 
     <div id="found-state" style="display:none;">
-      <div style="background:var(--green2-dim);border:1px solid rgba(0,223,162,0.3);border-radius:12px;padding:16px;margin-bottom:20px;">
+      <div style="background:var(--green2-dim);border:1px solid rgba(0,255,204,0.3);border-radius:12px;padding:16px;margin-bottom:20px;">
         <div style="font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--green2);font-family:var(--font-mono);margin-bottom:6px;">Device found</div>
         <div style="font-family:var(--font-mono);font-size:13px;color:var(--green);" id="found-device-id"></div>
       </div>
@@ -367,7 +367,7 @@
       <div class="gauge-wrap">
         <svg viewBox="0 0 200 115" xmlns="http://www.w3.org/2000/svg">
           <path d="M20,105 A80,80 0 0,1 180,105" fill="none" stroke="#1c1c1c" stroke-width="12" stroke-linecap="round"/>
-          <path id="gauge-arc" d="M20,105 A80,80 0 0,1 180,105" fill="none" stroke="#00dfa2" stroke-width="12" stroke-linecap="round" stroke-dasharray="251" stroke-dashoffset="251"/>
+          <path id="gauge-arc" d="M20,105 A80,80 0 0,1 180,105" fill="none" stroke="#00ffcc" stroke-width="12" stroke-linecap="round" stroke-dasharray="251" stroke-dashoffset="251"/>
         </svg>
         <div class="gauge-pct" id="gauge-pct" style="color:var(--muted)">--%</div>
       </div>

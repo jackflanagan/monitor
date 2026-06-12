@@ -2,31 +2,31 @@ const { colorFor, urlBase64ToUint8Array } = require('../src/utils.js');
 
 describe('colorFor', () => {
   test('returns amber for dry soil (< 30)', () => {
-    expect(colorFor(0)).toBe('#ffca3a');
-    expect(colorFor(1)).toBe('#ffca3a');
-    expect(colorFor(29)).toBe('#ffca3a');
+    expect(colorFor(0)).toBe('#ffd500');
+    expect(colorFor(1)).toBe('#ffd500');
+    expect(colorFor(29)).toBe('#ffd500');
   });
 
   test('returns green for ok soil (30–69)', () => {
-    expect(colorFor(30)).toBe('#00dfa2');
-    expect(colorFor(50)).toBe('#00dfa2');
-    expect(colorFor(69)).toBe('#00dfa2');
+    expect(colorFor(30)).toBe('#00ffcc');
+    expect(colorFor(50)).toBe('#00ffcc');
+    expect(colorFor(69)).toBe('#00ffcc');
   });
 
   test('returns blue for wet soil (>= 70)', () => {
-    expect(colorFor(70)).toBe('#4db8ff');
-    expect(colorFor(85)).toBe('#4db8ff');
-    expect(colorFor(100)).toBe('#4db8ff');
+    expect(colorFor(70)).toBe('#00d4ff');
+    expect(colorFor(85)).toBe('#00d4ff');
+    expect(colorFor(100)).toBe('#00d4ff');
   });
 
   test('boundary at exactly 30 is green not amber', () => {
-    expect(colorFor(30)).toBe('#00dfa2');
-    expect(colorFor(29)).toBe('#ffca3a');
+    expect(colorFor(30)).toBe('#00ffcc');
+    expect(colorFor(29)).toBe('#ffd500');
   });
 
   test('boundary at exactly 70 is blue not green', () => {
-    expect(colorFor(70)).toBe('#4db8ff');
-    expect(colorFor(69)).toBe('#00dfa2');
+    expect(colorFor(70)).toBe('#00d4ff');
+    expect(colorFor(69)).toBe('#00ffcc');
   });
 });
 

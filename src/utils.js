@@ -1,5 +1,5 @@
 function colorFor(v) {
-  return v < 30 ? '#ffca3a' : v >= 70 ? '#4db8ff' : '#00dfa2';
+  return v < 30 ? '#ffd500' : v >= 70 ? '#00d4ff' : '#00ffcc';
 }
 
 function urlBase64ToUint8Array(base64String) {
