@@ -3,274 +3,606 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="theme-color" content="#1a4423">
-<meta name="description" content="Moist — smart soil moisture monitoring for your plants. Get real-time readings anywhere.">
+<meta name="theme-color" content="#0a0a0a">
+<meta name="description" content="Moist — the cute frog-shaped plant moisture sensor that tells you exactly when to water your plants, from anywhere in the world.">
 <title>Moist — Never kill a plant again</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Cabinet+Grotesk:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Cabinet+Grotesk:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-  :root{
-    --green:#2dff6e;--green2:#00ffcc;--green-dim:#0d3a1a;--green2-dim:#004d3a;--amber:#ffd500;--blue:#00d4ff;
-    --bg:#1a4423;--surface:#224f2b;--surface2:#2a5e34;--border:rgba(45,255,110,0.3);
-    --text:#ffffff;--muted:#a8ddb5;
-    --font-head:'Cabinet Grotesk',sans-serif;--font-mono:'DM Mono',monospace;
+  :root {
+    --green: #5aff7e;
+    --green-dim: #1a3a22;
+    --bg: #0a0a0a;
+    --surface: #141414;
+    --surface2: #1c1c1c;
+    --border: rgba(255,255,255,0.07);
+    --text: #f0f0f0;
+    --muted: #666;
+    --font-head: 'Cabinet Grotesk', sans-serif;
+    --font-mono: 'DM Mono', monospace;
   }
-  *{box-sizing:border-box;margin:0;padding:0}
-  html{scroll-behavior:smooth}
-  body{background:var(--bg);color:var(--text);font-family:var(--font-head);overflow-x:hidden}
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body { background: var(--bg); color: var(--text); font-family: var(--font-head); overflow-x: hidden; line-height: 1.5; }
 
-  /* Nav */
-  nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:0 24px;height:60px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);background:rgba(26,68,35,0.95);backdrop-filter:blur(12px)}
-  .nav-logo{font-size:20px;font-weight:800;letter-spacing:-0.03em;text-decoration:none;color:var(--text)}
-  .nav-logo span{color:var(--green)}
-  .nav-links{display:flex;align-items:center;gap:28px}
-  .nav-links a{font-size:14px;color:var(--muted);text-decoration:none;transition:color 0.2s}
-  .nav-links a:hover{color:var(--text)}
-  .nav-cta{background:var(--green);color:#000;border:none;border-radius:10px;padding:9px 20px;font-family:var(--font-head);font-size:14px;font-weight:800;cursor:pointer;text-decoration:none;transition:opacity 0.2s}
-  .nav-cta:hover{opacity:0.9}
+  /* ── Nav ─────────────────────────────────────────── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    height: 60px; padding: 0 24px;
+    display: flex; align-items: center; justify-content: space-between;
+    border-bottom: 1px solid var(--border);
+    background: rgba(10,10,10,0.88); backdrop-filter: blur(14px);
+  }
+  .nav-logo { font-size: 20px; font-weight: 900; letter-spacing: -0.03em; color: var(--text); text-decoration: none; }
+  .nav-logo span { color: var(--green); }
+  .nav-links { display: flex; align-items: center; gap: 32px; }
+  .nav-links a { font-size: 14px; color: var(--muted); text-decoration: none; transition: color 0.2s; }
+  .nav-links a:hover { color: var(--text); }
+  .nav-cta {
+    background: var(--green); color: #000; border: none; border-radius: 10px;
+    padding: 9px 20px; font-family: var(--font-head); font-size: 14px; font-weight: 800;
+    cursor: pointer; text-decoration: none; transition: opacity 0.2s; letter-spacing: -0.01em;
+  }
+  .nav-cta:hover { opacity: 0.88; }
 
-  /* Sections */
-  section{max-width:1100px;margin:0 auto;padding:0 24px}
+  /* ── Sections ────────────────────────────────────── */
+  .section-inner { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
 
-  /* Hero */
-  .hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:80px 24px 60px;position:relative}
-  .hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 60% 50% at 50% 40%,rgba(45,255,110,0.12) 0%,transparent 70%);pointer-events:none}
-  .hero-eyebrow{display:inline-flex;align-items:center;gap:8px;background:var(--green-dim);border:1px solid rgba(45,255,110,0.3);border-radius:99px;padding:6px 14px;font-size:12px;font-family:var(--font-mono);color:var(--green);margin-bottom:28px}
-  .hero-eyebrow::before{content:'';width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);animation:pulse 2s infinite}
-  @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
-  .hero-title{font-size:clamp(42px,8vw,88px);font-weight:800;letter-spacing:-0.04em;line-height:1;margin-bottom:24px;max-width:800px}
-  .hero-title span{color:var(--green)}
-  .hero-sub{font-size:clamp(16px,2vw,20px);color:var(--muted);line-height:1.6;max-width:480px;margin:0 auto 40px}
-  .hero-actions{display:flex;gap:14px;flex-wrap:wrap;justify-content:center}
-  .btn-hero{display:inline-flex;align-items:center;gap:8px;background:var(--green);color:#000;border:none;border-radius:14px;padding:16px 32px;font-family:var(--font-head);font-size:16px;font-weight:800;cursor:pointer;text-decoration:none;transition:opacity 0.2s;letter-spacing:-0.01em}
-  .btn-hero:hover{opacity:0.9}
-  .btn-hero-ghost{display:inline-flex;align-items:center;gap:8px;background:none;color:var(--text);border:1px solid var(--border);border-radius:14px;padding:16px 32px;font-family:var(--font-head);font-size:16px;font-weight:700;cursor:pointer;text-decoration:none;transition:all 0.2s}
-  .btn-hero-ghost:hover{border-color:rgba(255,255,255,0.2)}
-  .hero-mock{margin-top:64px;background:var(--surface);border:1px solid var(--border);border-radius:28px;padding:28px;max-width:340px;width:100%;text-align:left;box-shadow:0 40px 80px rgba(0,0,0,0.6)}
-  .mock-header{font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);font-family:var(--font-mono);margin-bottom:6px}
-  .mock-plant{font-size:20px;font-weight:800;letter-spacing:-0.02em;margin-bottom:20px}
-  .mock-gauge{display:flex;flex-direction:column;align-items:center;margin-bottom:20px}
-  .mock-pct{font-size:52px;font-weight:800;color:var(--green);letter-spacing:-0.04em;line-height:1}
-  .mock-pct-label{font-size:12px;font-family:var(--font-mono);color:var(--muted);margin-top:4px}
-  .mock-pill{display:inline-flex;align-items:center;gap:7px;padding:7px 14px;border-radius:99px;font-size:12px;font-family:var(--font-mono);background:var(--green-dim);color:var(--green);margin-bottom:16px}
-  .mock-pill-dot{width:6px;height:6px;border-radius:50%;background:var(--green)}
-  .mock-bars{display:flex;align-items:flex-end;gap:4px;height:40px}
-  .mock-bar{flex:1;border-radius:2px 2px 0 0;background:var(--green);opacity:0.7}
+  /* ── Hero ────────────────────────────────────────── */
+  .hero {
+    min-height: 100vh; padding: 120px 24px 80px;
+    display: flex; align-items: center; justify-content: center;
+    position: relative; overflow: hidden;
+  }
+  .hero::before {
+    content: ''; position: absolute; inset: 0;
+    background: radial-gradient(ellipse 70% 55% at 50% 30%, rgba(90,255,126,0.07) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero-inner {
+    max-width: 1100px; width: 100%; margin: 0 auto;
+    display: grid; grid-template-columns: 1fr 1fr; gap: 64px; align-items: center;
+  }
+  .hero-eyebrow {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--green-dim); border: 1px solid rgba(90,255,126,0.25);
+    border-radius: 99px; padding: 6px 14px;
+    font-size: 12px; font-family: var(--font-mono); color: var(--green); margin-bottom: 24px;
+  }
+  .hero-eyebrow::before {
+    content: ''; width: 7px; height: 7px; border-radius: 50%;
+    background: var(--green); box-shadow: 0 0 8px var(--green); animation: pulse 2s infinite;
+  }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.35} }
+  .hero-title {
+    font-size: clamp(40px, 5.5vw, 72px); font-weight: 900;
+    letter-spacing: -0.04em; line-height: 1.02; margin-bottom: 22px;
+  }
+  .hero-title span { color: var(--green); }
+  .hero-sub {
+    font-size: clamp(15px, 1.6vw, 18px); color: var(--muted);
+    line-height: 1.65; max-width: 480px; margin-bottom: 36px;
+  }
+  .hero-actions { display: flex; gap: 14px; flex-wrap: wrap; }
+  .btn-primary {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--green); color: #000; border: none; border-radius: 13px;
+    padding: 15px 30px; font-family: var(--font-head); font-size: 15px; font-weight: 800;
+    cursor: pointer; text-decoration: none; transition: opacity 0.2s; letter-spacing: -0.01em;
+  }
+  .btn-primary:hover { opacity: 0.88; }
+  .btn-ghost {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: none; color: var(--text); border: 1px solid var(--border);
+    border-radius: 13px; padding: 15px 30px; font-family: var(--font-head); font-size: 15px; font-weight: 700;
+    cursor: pointer; text-decoration: none; transition: border-color 0.2s;
+  }
+  .btn-ghost:hover { border-color: rgba(255,255,255,0.2); }
 
-  /* How it works */
-  .how-it-works{padding:100px 24px;text-align:center}
-  .section-label{font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:var(--green);font-family:var(--font-mono);margin-bottom:14px}
-  .section-title{font-size:clamp(28px,4vw,44px);font-weight:800;letter-spacing:-0.03em;margin-bottom:16px}
-  .section-sub{font-size:16px;color:var(--muted);max-width:480px;margin:0 auto 60px;line-height:1.65}
-  .steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:20px;max-width:900px;margin:0 auto}
-  .step{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:28px;text-align:left;position:relative}
-  .step-num{width:36px;height:36px;border-radius:50%;background:var(--green-dim);border:1px solid rgba(45,255,110,0.3);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:var(--green);margin-bottom:20px;font-family:var(--font-mono)}
-  .step-icon{font-size:32px;margin-bottom:14px;display:block}
-  .step-title{font-size:17px;font-weight:800;letter-spacing:-0.01em;margin-bottom:8px}
-  .step-body{font-size:14px;color:var(--muted);line-height:1.65}
+  /* Phone mockup */
+  .phone-wrap { display: flex; justify-content: center; align-items: center; position: relative; }
+  .phone {
+    width: 240px; background: #111; border-radius: 36px; padding: 12px;
+    box-shadow: 0 0 0 1px rgba(255,255,255,0.1), 0 40px 80px rgba(0,0,0,0.7), 0 0 60px rgba(90,255,126,0.08);
+    position: relative;
+  }
+  .phone-notch {
+    width: 80px; height: 22px; background: #000; border-radius: 0 0 16px 16px;
+    margin: 0 auto 10px; display: flex; align-items: center; justify-content: center;
+  }
+  .phone-notch::after { content: ''; width: 50px; height: 4px; background: #1c1c1c; border-radius: 2px; }
+  .phone-screen { background: #0a0a0a; border-radius: 26px; overflow: hidden; padding: 16px 14px 20px; }
+  .mock-header { font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); font-family: var(--font-mono); margin-bottom: 3px; }
+  .mock-plant { font-size: 15px; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 16px; }
+  .mock-gauge-wrap { display: flex; flex-direction: column; align-items: center; margin-bottom: 14px; }
+  .mock-pct { font-size: 42px; font-weight: 900; color: var(--green); letter-spacing: -0.04em; line-height: 1; }
+  .mock-label { font-size: 10px; color: var(--muted); font-family: var(--font-mono); margin-top: 3px; }
+  .mock-pill {
+    display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px;
+    border-radius: 99px; background: var(--green-dim); color: var(--green);
+    font-size: 10px; font-family: var(--font-mono); margin-bottom: 14px;
+  }
+  .mock-pill-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); animation: pulse 2s infinite; }
+  .mock-bars { display: flex; align-items: flex-end; gap: 3px; height: 36px; margin-bottom: 14px; }
+  .mock-bar { flex: 1; border-radius: 2px 2px 0 0; background: var(--green); opacity: 0.6; }
+  .mock-metrics { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .mock-metric { background: var(--surface); border-radius: 10px; padding: 8px 10px; }
+  .mock-metric-label { font-size: 8px; color: var(--muted); font-family: var(--font-mono); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 3px; }
+  .mock-metric-val { font-size: 16px; font-weight: 800; }
+  .phone-glow {
+    position: absolute; bottom: -30px; left: 50%; transform: translateX(-50%);
+    width: 160px; height: 60px;
+    background: radial-gradient(ellipse, rgba(90,255,126,0.25) 0%, transparent 70%);
+    pointer-events: none;
+  }
 
-  /* Features */
-  .features{padding:100px 24px}
-  .features-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;max-width:1000px;margin:0 auto}
-  .feature{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:24px}
-  .feature-icon{font-size:28px;margin-bottom:14px}
-  .feature-title{font-size:16px;font-weight:800;letter-spacing:-0.01em;margin-bottom:6px}
-  .feature-body{font-size:13px;color:var(--muted);line-height:1.65}
+  /* ── Social proof ────────────────────────────────── */
+  .social-proof {
+    border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+    padding: 18px 24px;
+  }
+  .social-proof-inner {
+    max-width: 1100px; margin: 0 auto;
+    display: flex; align-items: center; justify-content: center;
+    gap: 12px; flex-wrap: wrap;
+    font-size: 13px; font-family: var(--font-mono); color: var(--muted);
+  }
+  .proof-dot { width: 4px; height: 4px; border-radius: 50%; background: var(--border); }
 
-  /* Pricing */
-  .pricing{padding:100px 24px;text-align:center}
-  .pricing-card{background:var(--surface);border:1px solid var(--border);border-radius:24px;padding:40px;max-width:400px;margin:0 auto}
-  .pricing-badge{display:inline-block;background:var(--green-dim);border:1px solid rgba(45,255,110,0.3);color:var(--green);font-size:11px;font-family:var(--font-mono);font-weight:500;letter-spacing:0.08em;padding:4px 12px;border-radius:99px;margin-bottom:20px}
-  .pricing-price{font-size:64px;font-weight:800;letter-spacing:-0.04em;line-height:1;color:var(--green);margin-bottom:6px}
-  .pricing-period{font-size:14px;color:var(--muted);font-family:var(--font-mono);margin-bottom:28px}
-  .pricing-features{list-style:none;text-align:left;margin-bottom:32px}
-  .pricing-features li{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);font-size:14px;color:var(--muted)}
-  .pricing-features li:last-child{border-bottom:none}
-  .pricing-features li::before{content:'✓';color:var(--green);font-weight:800;font-size:13px;flex-shrink:0}
-  .btn-pricing{display:block;width:100%;padding:16px;background:var(--green);color:#000;border:none;border-radius:14px;font-family:var(--font-head);font-size:16px;font-weight:800;cursor:pointer;text-decoration:none;text-align:center;transition:opacity 0.2s}
-  .btn-pricing:hover{opacity:0.9}
-  .pricing-note{font-size:12px;color:var(--muted);font-family:var(--font-mono);margin-top:14px}
+  /* ── Section headings ────────────────────────────── */
+  .section-eyebrow { font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--green); font-family: var(--font-mono); margin-bottom: 12px; }
+  .section-title { font-size: clamp(28px, 3.5vw, 44px); font-weight: 900; letter-spacing: -0.03em; margin-bottom: 14px; }
+  .section-sub { font-size: 16px; color: var(--muted); max-width: 480px; line-height: 1.65; }
 
-  /* Footer */
-  footer{border-top:1px solid var(--border);padding:32px 24px;text-align:center;font-size:13px;color:var(--muted);font-family:var(--font-mono)}
-  footer a{color:var(--muted);text-decoration:none;transition:color 0.2s}
-  footer a:hover{color:var(--text)}
-  .footer-inner{max-width:1100px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
+  /* ── How it works ────────────────────────────────── */
+  .how { padding: 100px 24px; }
+  .how-inner { max-width: 1100px; margin: 0 auto; }
+  .how-header { text-align: center; margin-bottom: 64px; }
+  .how-header .section-sub { margin: 0 auto; }
+  .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+  .step {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 20px;
+    padding: 32px 28px; position: relative; overflow: hidden;
+  }
+  .step::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+    background: linear-gradient(90deg, var(--green), transparent);
+  }
+  .step-num {
+    font-size: 64px; font-weight: 900; letter-spacing: -0.04em; line-height: 1;
+    color: rgba(90,255,126,0.12); margin-bottom: 20px; font-family: var(--font-head);
+  }
+  .step-icon { font-size: 32px; margin-bottom: 14px; display: block; }
+  .step-title { font-size: 18px; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 10px; }
+  .step-body { font-size: 14px; color: var(--muted); line-height: 1.7; }
 
-  @media(max-width:600px){
-    .nav-links{display:none}
-    .hero-title{font-size:42px}
-    .footer-inner{justify-content:center}
+  /* ── Features ────────────────────────────────────── */
+  .features { padding: 100px 24px; background: var(--surface); }
+  .features-inner { max-width: 1100px; margin: 0 auto; }
+  .features-header { text-align: center; margin-bottom: 56px; }
+  .features-header .section-sub { margin: 0 auto; }
+  .features-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .feature-card {
+    background: var(--surface2); border: 1px solid var(--border); border-radius: 18px;
+    padding: 26px; transition: border-color 0.2s;
+  }
+  .feature-card:hover { border-color: rgba(90,255,126,0.2); }
+  .feature-icon { font-size: 30px; margin-bottom: 14px; display: block; }
+  .feature-title { font-size: 16px; font-weight: 800; letter-spacing: -0.01em; margin-bottom: 8px; }
+  .feature-body { font-size: 13px; color: var(--muted); line-height: 1.65; }
+
+  /* ── Sensor section ──────────────────────────────── */
+  .sensor { padding: 100px 24px; }
+  .sensor-inner {
+    max-width: 1100px; margin: 0 auto;
+    display: grid; grid-template-columns: 1fr 1fr; gap: 72px; align-items: center;
+  }
+  .frog-placeholder {
+    aspect-ratio: 1; max-width: 420px; width: 100%;
+    background: var(--surface); border: 1px solid var(--border); border-radius: 32px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 16px; position: relative; overflow: hidden;
+  }
+  .frog-placeholder::before {
+    content: ''; position: absolute; inset: 0;
+    background: radial-gradient(ellipse 60% 60% at 50% 40%, rgba(90,255,126,0.06) 0%, transparent 70%);
+  }
+  .frog-emoji { font-size: 96px; line-height: 1; }
+  .frog-caption { font-size: 12px; color: var(--muted); font-family: var(--font-mono); }
+  .sensor-text .section-sub { margin-bottom: 32px; }
+  /* Waitlist form */
+  .waitlist-form { display: flex; flex-direction: column; gap: 10px; }
+  .waitlist-form-row { display: flex; gap: 10px; }
+  .waitlist-input {
+    flex: 1; padding: 13px 16px; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 12px; color: var(--text); font-family: var(--font-mono); font-size: 14px;
+    outline: none; transition: border-color 0.2s;
+  }
+  .waitlist-input:focus { border-color: rgba(90,255,126,0.4); }
+  .waitlist-input::placeholder { color: var(--muted); }
+  .waitlist-btn {
+    padding: 13px 22px; background: var(--green); color: #000; border: none; border-radius: 12px;
+    font-family: var(--font-head); font-size: 14px; font-weight: 800; cursor: pointer;
+    white-space: nowrap; transition: opacity 0.2s;
+  }
+  .waitlist-btn:hover { opacity: 0.88; }
+  .waitlist-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .waitlist-msg { font-size: 13px; font-family: var(--font-mono); display: none; }
+  .waitlist-msg.success { color: var(--green); display: block; }
+  .waitlist-msg.error { color: #ff6b6b; display: block; }
+  .waitlist-note { font-size: 12px; color: var(--muted); font-family: var(--font-mono); }
+
+  /* ── Pricing ─────────────────────────────────────── */
+  .pricing { padding: 100px 24px; background: var(--surface); }
+  .pricing-inner { max-width: 1100px; margin: 0 auto; }
+  .pricing-header { text-align: center; margin-bottom: 56px; }
+  .pricing-header .section-sub { margin: 0 auto; }
+  .pricing-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; max-width: 720px; margin: 0 auto; }
+  .pricing-card {
+    background: var(--surface2); border: 1px solid var(--border); border-radius: 24px;
+    padding: 36px 32px;
+  }
+  .pricing-card.featured { border-color: rgba(90,255,126,0.25); background: #0f1f12; }
+  .pricing-badge {
+    display: inline-block; background: var(--green-dim); border: 1px solid rgba(90,255,126,0.25);
+    color: var(--green); font-size: 11px; font-family: var(--font-mono); letter-spacing: 0.08em;
+    padding: 4px 12px; border-radius: 99px; margin-bottom: 20px;
+  }
+  .pricing-name { font-size: 22px; font-weight: 900; letter-spacing: -0.02em; margin-bottom: 6px; }
+  .pricing-price {
+    font-size: 52px; font-weight: 900; letter-spacing: -0.04em; line-height: 1;
+    margin-bottom: 6px; color: var(--green);
+  }
+  .pricing-price.muted { color: var(--text); }
+  .pricing-period { font-size: 13px; color: var(--muted); font-family: var(--font-mono); margin-bottom: 28px; }
+  .pricing-features { list-style: none; margin-bottom: 28px; }
+  .pricing-features li {
+    display: flex; align-items: center; gap: 11px;
+    font-size: 14px; color: var(--muted); padding: 9px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .pricing-features li:last-child { border-bottom: none; }
+  .pricing-features li::before { content: '✓'; color: var(--green); font-weight: 900; font-size: 13px; flex-shrink: 0; }
+  .pricing-features li.dim::before { color: var(--muted); }
+  .btn-pricing {
+    display: block; width: 100%; padding: 14px; background: var(--green); color: #000; border: none;
+    border-radius: 12px; font-family: var(--font-head); font-size: 15px; font-weight: 800;
+    cursor: pointer; text-decoration: none; text-align: center; transition: opacity 0.2s;
+  }
+  .btn-pricing:hover { opacity: 0.88; }
+  .btn-pricing.outline {
+    background: none; color: var(--muted); border: 1px solid var(--border);
+  }
+  .btn-pricing.outline:hover { border-color: rgba(255,255,255,0.2); color: var(--text); }
+
+  /* ── Footer ──────────────────────────────────────── */
+  footer {
+    border-top: 1px solid var(--border); padding: 36px 24px;
+    font-size: 13px; color: var(--muted); font-family: var(--font-mono);
+  }
+  .footer-inner {
+    max-width: 1100px; margin: 0 auto;
+    display: flex; justify-content: space-between; align-items: center;
+    flex-wrap: wrap; gap: 16px;
+  }
+  .footer-logo { font-family: var(--font-head); font-size: 16px; font-weight: 900; color: var(--text); text-decoration: none; }
+  .footer-logo span { color: var(--green); }
+  .footer-links { display: flex; gap: 24px; flex-wrap: wrap; }
+  .footer-links a { color: var(--muted); text-decoration: none; transition: color 0.2s; }
+  .footer-links a:hover { color: var(--text); }
+  .footer-copy { color: var(--muted); }
+
+  /* ── Responsive ──────────────────────────────────── */
+  @media (max-width: 900px) {
+    .hero-inner { grid-template-columns: 1fr; gap: 48px; text-align: center; }
+    .hero-sub { margin-left: auto; margin-right: auto; }
+    .hero-actions { justify-content: center; }
+    .hero-eyebrow { margin-left: auto; margin-right: auto; }
+    .steps { grid-template-columns: 1fr; }
+    .features-grid { grid-template-columns: 1fr 1fr; }
+    .sensor-inner { grid-template-columns: 1fr; text-align: center; }
+    .frog-placeholder { margin: 0 auto; }
+    .pricing-cards { grid-template-columns: 1fr; max-width: 400px; }
+  }
+  @media (max-width: 600px) {
+    .nav-links { display: none; }
+    .features-grid { grid-template-columns: 1fr; }
+    .hero { padding: 100px 20px 60px; }
+    .waitlist-form-row { flex-direction: column; }
+    .footer-inner { flex-direction: column; align-items: flex-start; gap: 20px; }
+    .footer-links { gap: 16px; }
   }
 </style>
 </head>
 <body>
 
-<!-- Nav -->
+<!-- ── Nav ──────────────────────────────────────────── -->
 <nav>
-  <a href="#" class="nav-logo">Moi<span>st</span></a>
+  <a href="#" class="nav-logo">Mois<span>t</span></a>
   <div class="nav-links">
-    <a href="#how-it-works">How it works</a>
     <a href="#features">Features</a>
+    <a href="#how-it-works">How it works</a>
+    <a href="#sensor">The sensor</a>
     <a href="#pricing">Pricing</a>
   </div>
   <a href="/index.html" class="nav-cta">Get started →</a>
 </nav>
 
-<!-- Hero -->
-<div class="hero">
-  <div class="hero-eyebrow">Free during beta</div>
-  <h1 class="hero-title">Never kill a<br><span>plant again</span></h1>
-  <p class="hero-sub">Moist monitors your plants' soil moisture in real time — from anywhere. Get alerts before they dry out.</p>
-  <div class="hero-actions">
-    <a href="/index.html" class="btn-hero">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-      Start monitoring free
-    </a>
-    <a href="#how-it-works" class="btn-hero-ghost">How it works</a>
+<!-- ── Hero ─────────────────────────────────────────── -->
+<section class="hero">
+  <div class="hero-inner">
+    <div class="hero-text">
+      <div class="hero-eyebrow">Free during beta</div>
+      <h1 class="hero-title">Never kill a<br><span>plant again</span></h1>
+      <p class="hero-sub">Moist monitors your soil moisture in real time and tells you exactly when to water — from anywhere in the world.</p>
+      <div class="hero-actions">
+        <a href="/index.html" class="btn-primary">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          Get started free
+        </a>
+        <a href="#sensor" class="btn-ghost">Join waitlist</a>
+      </div>
+    </div>
+    <!-- Phone mockup -->
+    <div class="phone-wrap">
+      <div class="phone">
+        <div class="phone-notch"></div>
+        <div class="phone-screen">
+          <div class="mock-header">Moist</div>
+          <div class="mock-plant">Living Room Fern</div>
+          <div class="mock-gauge-wrap">
+            <div class="mock-pct">62<span style="font-size:22px;color:var(--muted)">%</span></div>
+            <div class="mock-label">soil moisture</div>
+          </div>
+          <div style="display:flex;justify-content:center;margin-bottom:12px">
+            <div class="mock-pill"><div class="mock-pill-dot"></div>Soil is OK</div>
+          </div>
+          <div class="mock-bars">
+            <div class="mock-bar" style="height:55%"></div>
+            <div class="mock-bar" style="height:48%"></div>
+            <div class="mock-bar" style="height:60%"></div>
+            <div class="mock-bar" style="height:70%"></div>
+            <div class="mock-bar" style="height:65%"></div>
+            <div class="mock-bar" style="height:58%"></div>
+            <div class="mock-bar" style="height:62%"></div>
+            <div class="mock-bar" style="height:67%"></div>
+            <div class="mock-bar" style="height:72%"></div>
+            <div class="mock-bar" style="height:62%"></div>
+          </div>
+          <div class="mock-metrics">
+            <div class="mock-metric">
+              <div class="mock-metric-label">Moisture</div>
+              <div class="mock-metric-val">62<span style="font-size:10px;color:var(--muted)">%</span></div>
+            </div>
+            <div class="mock-metric">
+              <div class="mock-metric-label">Raw ADC</div>
+              <div class="mock-metric-val" style="font-size:13px;color:var(--muted)">1842</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="phone-glow"></div>
+    </div>
   </div>
-  <!-- Mini app mockup -->
-  <div class="hero-mock">
-    <div class="mock-header">Moist</div>
-    <div class="mock-plant">Living Room Fern</div>
-    <div class="mock-gauge">
-      <div class="mock-pct">62%</div>
-      <div class="mock-pct-label">moisture</div>
-    </div>
-    <div style="display:flex;justify-content:center;margin-bottom:16px">
-      <div class="mock-pill"><div class="mock-pill-dot"></div>Soil is OK</div>
-    </div>
-    <div class="mock-bars">
-      <div class="mock-bar" style="height:55%"></div>
-      <div class="mock-bar" style="height:48%"></div>
-      <div class="mock-bar" style="height:60%"></div>
-      <div class="mock-bar" style="height:70%"></div>
-      <div class="mock-bar" style="height:65%"></div>
-      <div class="mock-bar" style="height:58%"></div>
-      <div class="mock-bar" style="height:62%"></div>
-      <div class="mock-bar" style="height:67%"></div>
-      <div class="mock-bar" style="height:72%"></div>
-      <div class="mock-bar" style="height:62%"></div>
-    </div>
+</section>
+
+<!-- ── Social proof ───────────────────────────────── -->
+<div class="social-proof">
+  <div class="social-proof-inner">
+    <span>Built on ESP32</span>
+    <div class="proof-dot"></div>
+    <span>Powered by Supabase</span>
+    <div class="proof-dot"></div>
+    <span>Works worldwide</span>
+    <div class="proof-dot"></div>
+    <span>Free to get started</span>
+    <div class="proof-dot"></div>
+    <span>Open source hardware</span>
   </div>
 </div>
 
-<!-- How it works -->
-<div id="how-it-works">
-  <div class="how-it-works">
-    <div class="section-label">How it works</div>
-    <h2 class="section-title">Set up in minutes</h2>
-    <p class="section-sub">Three simple steps and your plants are monitored 24/7.</p>
+<!-- ── How it works ──────────────────────────────── -->
+<section id="how-it-works" class="how">
+  <div class="how-inner">
+    <div class="how-header">
+      <div class="section-eyebrow">How it works</div>
+      <h2 class="section-title">Set up in minutes</h2>
+      <p class="section-sub">Three steps and your plant is being monitored 24/7 from anywhere in the world.</p>
+    </div>
     <div class="steps">
       <div class="step">
-        <div class="step-num">1</div>
+        <div class="step-num">01</div>
         <span class="step-icon">🔌</span>
-        <div class="step-title">Plug in your sensor</div>
-        <div class="step-body">Connect your ESP32 moisture sensor to power. The LED blinks to show it's ready to configure.</div>
+        <div class="step-title">Plug in your Moist sensor</div>
+        <div class="step-body">Connect your frog-shaped ESP32 sensor to any USB power source and place it in your plant pot. The LED blinks green when it's ready to configure.</div>
       </div>
       <div class="step">
-        <div class="step-num">2</div>
+        <div class="step-num">02</div>
         <span class="step-icon">📶</span>
-        <div class="step-title">Connect to WiFi</div>
-        <div class="step-body">Join the <strong style="color:var(--text)">Moist Setup</strong> hotspot from your phone and enter your home WiFi details at 192.168.4.1.</div>
+        <div class="step-title">Connect to your home WiFi</div>
+        <div class="step-body">Join the <strong style="color:var(--text)">Moist Setup</strong> hotspot from your phone and enter your home WiFi password at 192.168.4.1. Takes about 30 seconds.</div>
       </div>
       <div class="step">
-        <div class="step-num">3</div>
+        <div class="step-num">03</div>
         <span class="step-icon">📱</span>
         <div class="step-title">Monitor from anywhere</div>
-        <div class="step-body">Open the Moist app on any device. Watch your soil moisture update in real time — wherever you are.</div>
+        <div class="step-body">Open the Moist app on any device, anywhere in the world. Your plant's moisture updates every 10 seconds — get alerts before it dries out.</div>
       </div>
     </div>
   </div>
-</div>
+</section>
 
-<!-- Features -->
-<div id="features">
-  <div class="features">
-    <div style="text-align:center;margin-bottom:60px">
-      <div class="section-label">Features</div>
+<!-- ── Features ──────────────────────────────────── -->
+<section id="features" class="features">
+  <div class="features-inner">
+    <div class="features-header">
+      <div class="section-eyebrow">Features</div>
       <h2 class="section-title">Everything your plants need</h2>
+      <p class="section-sub">Built for real plant owners, not just tech enthusiasts.</p>
     </div>
     <div class="features-grid">
-      <div class="feature">
-        <div class="feature-icon">⚡</div>
-        <div class="feature-title">Live readings</div>
-        <div class="feature-body">Moisture updates every 10 seconds. See the exact percentage, raw ADC value, and status at a glance.</div>
+      <div class="feature-card">
+        <span class="feature-icon">⚡</span>
+        <div class="feature-title">Live moisture readings</div>
+        <div class="feature-body">Your soil moisture updates every 10 seconds. See the exact percentage, raw ADC value, and status at a glance from any device.</div>
       </div>
-      <div class="feature">
-        <div class="feature-icon">🔔</div>
-        <div class="feature-title">Push notifications</div>
-        <div class="feature-body">Get an alert on your phone the moment soil dips below your threshold — before your plant feels it.</div>
+      <div class="feature-card">
+        <span class="feature-icon">🔔</span>
+        <div class="feature-title">Dry alerts to your phone</div>
+        <div class="feature-body">Get a push notification the moment your soil drops below the threshold. Never come home to a dead plant again.</div>
       </div>
-      <div class="feature">
-        <div class="feature-icon">🌿</div>
+      <div class="feature-card">
+        <span class="feature-icon">🌍</span>
+        <div class="feature-title">Works from anywhere</div>
+        <div class="feature-body">Not just your home network — check your plants from work, on holiday, or anywhere with a data connection. Fully cloud-connected via Supabase.</div>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">🪴</span>
         <div class="feature-title">Multiple plants</div>
-        <div class="feature-body">Add unlimited devices and switch between them with a tap. Each plant gets its own dashboard.</div>
+        <div class="feature-body">Add as many sensors as you like and switch between them instantly. Each plant gets its own history, thresholds, and alerts.</div>
       </div>
-      <div class="feature">
-        <div class="feature-icon">🌍</div>
-        <div class="feature-title">Works anywhere</div>
-        <div class="feature-body">Data syncs through Supabase. Check your plants while you're at work, travelling, or anywhere.</div>
+      <div class="feature-card">
+        <span class="feature-icon">🔐</span>
+        <div class="feature-title">Google login</div>
+        <div class="feature-body">Sign in with Google in one tap, or use email and password. Your data is securely stored and only visible to you.</div>
       </div>
-      <div class="feature">
-        <div class="feature-icon">📊</div>
-        <div class="feature-title">History charts</div>
-        <div class="feature-body">View 24-hour, 7-day, and 30-day moisture trends with a beautiful D3 line chart.</div>
-      </div>
-      <div class="feature">
-        <div class="feature-icon">🎯</div>
-        <div class="feature-title">Plant profiles</div>
-        <div class="feature-body">Choose from preset profiles — Succulent, Cactus, Tropical, Herb, Fern — or calibrate your own thresholds.</div>
-      </div>
-      <div class="feature">
-        <div class="feature-icon">💧</div>
-        <div class="feature-title">Watering log</div>
-        <div class="feature-body">Mark when you water each plant and track how long it stays hydrated over time.</div>
-      </div>
-      <div class="feature">
-        <div class="feature-icon">🔋</div>
-        <div class="feature-title">Battery mode</div>
-        <div class="feature-body">Enable deep sleep on your ESP32 to run on a small LiPo battery for weeks between charges.</div>
+      <div class="feature-card">
+        <span class="feature-icon">🆓</span>
+        <div class="feature-title">Free to get started</div>
+        <div class="feature-body">Monitor one plant with live readings and push notifications completely free. Upgrade to Pro whenever you're ready for more.</div>
       </div>
     </div>
   </div>
-</div>
+</section>
 
-<!-- Pricing -->
-<div id="pricing">
-  <div class="pricing">
-    <div class="section-label">Pricing</div>
-    <h2 class="section-title">Simple pricing</h2>
-    <p class="section-sub" style="margin-bottom:40px">Free while we're in beta. No credit card required.</p>
-    <div class="pricing-card">
-      <div class="pricing-badge">Beta</div>
-      <div class="pricing-price">Free</div>
-      <div class="pricing-period">during beta · no card needed</div>
-      <ul class="pricing-features">
-        <li>Unlimited devices</li>
-        <li>Real-time moisture readings</li>
-        <li>Push notifications</li>
-        <li>30-day history charts</li>
-        <li>Watering log</li>
-        <li>Plant profiles &amp; calibration</li>
-        <li>PWA + Android app</li>
-      </ul>
-      <a href="/index.html" class="btn-pricing">Get started free →</a>
-      <div class="pricing-note">No spam. No lock-in. Cancel whenever.</div>
+<!-- ── The Sensor ─────────────────────────────────── -->
+<section id="sensor" class="sensor">
+  <div class="sensor-inner">
+    <div class="frog-placeholder">
+      <div class="frog-emoji">🐸</div>
+      <div class="frog-caption" style="text-align:center;line-height:1.6">
+        Frog sensor concept<br>
+        <span style="opacity:0.5">3D printed · ESP32-powered</span>
+      </div>
+    </div>
+    <div class="sensor-text">
+      <div class="section-eyebrow">The sensor</div>
+      <h2 class="section-title">Meet your new<br>plant friend</h2>
+      <p class="section-sub" style="margin-bottom:14px">A cute frog-shaped sensor that sits in your plant pot and keeps watch 24/7. 3D printable, open-source hardware — or we'll send you one.</p>
+      <p style="font-size:14px;color:var(--muted);margin-bottom:32px;line-height:1.7">Built on the ESP32 microcontroller with a capacitive soil moisture probe, USB-C charging, and an LED status light right in the frog's forehead. You can print your own or join the waitlist for a pre-built one.</p>
+      <!-- Waitlist form -->
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:24px;">
+        <div style="font-size:14px;font-weight:800;margin-bottom:4px;">Join the waitlist</div>
+        <div style="font-size:13px;color:var(--muted);margin-bottom:18px;font-family:var(--font-mono)">Be first to know when pre-built sensors ship.</div>
+        <div class="waitlist-form">
+          <div class="waitlist-form-row">
+            <input type="email" class="waitlist-input" id="waitlist-email" placeholder="you@example.com" autocomplete="email">
+            <button class="waitlist-btn" id="waitlist-btn" onclick="joinWaitlist()">Notify me</button>
+          </div>
+          <div class="waitlist-msg" id="waitlist-msg"></div>
+          <div class="waitlist-note">No spam. Unsubscribe any time.</div>
+        </div>
+      </div>
     </div>
   </div>
-</div>
+</section>
 
-<!-- Footer -->
+<!-- ── Pricing ────────────────────────────────────── -->
+<section id="pricing" class="pricing">
+  <div class="pricing-inner">
+    <div class="pricing-header">
+      <div class="section-eyebrow">Pricing</div>
+      <h2 class="section-title">Simple, honest pricing</h2>
+      <p class="section-sub">Start free. Upgrade when you need more.</p>
+    </div>
+    <div class="pricing-cards">
+      <div class="pricing-card featured">
+        <div class="pricing-badge">Current plan</div>
+        <div class="pricing-name">Free</div>
+        <div class="pricing-price">£0</div>
+        <div class="pricing-period">forever</div>
+        <ul class="pricing-features">
+          <li>1 plant sensor</li>
+          <li>Live moisture readings</li>
+          <li>Push notifications</li>
+          <li>Google &amp; email login</li>
+          <li>Works from anywhere</li>
+        </ul>
+        <a href="/index.html" class="btn-pricing">Get started free →</a>
+      </div>
+      <div class="pricing-card">
+        <div class="pricing-badge" style="background:var(--surface2);border-color:var(--border);color:var(--muted)">Coming soon</div>
+        <div class="pricing-name">Pro</div>
+        <div class="pricing-price muted">£2.99</div>
+        <div class="pricing-period">per month</div>
+        <ul class="pricing-features">
+          <li>Unlimited plant sensors</li>
+          <li>90-day history charts</li>
+          <li>Weekly email digests</li>
+          <li>Custom alert thresholds</li>
+          <li>Priority support</li>
+        </ul>
+        <a href="#sensor" class="btn-pricing outline">Join waitlist →</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Footer ─────────────────────────────────────── -->
 <footer>
   <div class="footer-inner">
-    <span>© 2026 Moist. Built with ❤️ for plants.</span>
-    <span>
-      <a href="/privacy.html">Privacy policy</a>
-      &nbsp;·&nbsp;
-      <a href="/index.html">Open app</a>
-    </span>
+    <a href="#" class="footer-logo">Mois<span>t</span></a>
+    <div class="footer-links">
+      <a href="/privacy.html">Privacy Policy</a>
+      <a href="/index.html">Get Started</a>
+      <a href="mailto:admin@plantmoist.com">admin@plantmoist.com</a>
+    </div>
+    <div class="footer-copy">© 2026 Moist. All rights reserved.</div>
   </div>
 </footer>
 
+<script>
+var SUPABASE_URL = 'https://usoirglmgylpyokmusez.supabase.co';
+var SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVzb2lyZ2xtZ3lscHlva211c2V6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY3NDY1MTgsImV4cCI6MjA5MjMyMjUxOH0.MOtJbBJP3WpqD7EZFnrRGUM-zuR4nyR02qIF-FK4Ncg';
+var sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+async function joinWaitlist() {
+  var email = document.getElementById('waitlist-email').value.trim();
+  var btn   = document.getElementById('waitlist-btn');
+  var msg   = document.getElementById('waitlist-msg');
+
+  msg.className = 'waitlist-msg';
+  msg.textContent = '';
+
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    msg.className = 'waitlist-msg error';
+    msg.textContent = 'Please enter a valid email address.';
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'Saving…';
+
+  var result = await sb.from('waitlist').insert({ email: email });
+
+  if (result.error) {
+    msg.className = 'waitlist-msg error';
+    msg.textContent = result.error.code === '23505'
+      ? 'You\'re already on the waitlist!'
+      : 'Something went wrong — please try again.';
+    btn.disabled = false;
+    btn.textContent = 'Notify me';
+  } else {
+    msg.className = 'waitlist-msg success';
+    msg.textContent = '🎉 You\'re on the list! We\'ll be in touch.';
+    document.getElementById('waitlist-email').value = '';
+    btn.textContent = 'Done!';
+  }
+}
+
+document.getElementById('waitlist-email').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') joinWaitlist();
+});
+</script>
 </body>
 </html>
