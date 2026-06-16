@@ -668,12 +668,24 @@ function showScreen(name){
   if(name!=='add-device') stopDeviceSearch();
 }
 
-function init(){
+async function init(){
+  // Proactively rehydrate the session rather than waiting for INITIAL_SESSION,
+  // which can fire before Supabase has loaded the stored token from localStorage.
+  var {data:{session}}=await sb.auth.getSession();
+  if(session){
+    currentUser=session.user;
+    await loadDashboard();
+  } else {
+    showScreen(localStorage.getItem('moist_wifi_setup')?'login':'wifi-setup');
+  }
+  // Listen for future auth changes (sign in, token refresh, sign out)
   sb.auth.onAuthStateChange(async function(event,session){
-    if(event==='INITIAL_SESSION'||event==='SIGNED_IN'){
-      if(session){currentUser=session.user;await loadDashboard();}
-      else if(!localStorage.getItem('moist_wifi_setup')){showScreen('wifi-setup');}
-      else showScreen('login');
+    if((event==='SIGNED_IN'||event==='TOKEN_REFRESHED')&&session&&!currentUser){
+      currentUser=session.user;await loadDashboard();
+    } else if(event==='SIGNED_OUT'){
+      currentUser=null;
+      if(refreshTimer)clearInterval(refreshTimer);
+      showScreen('login');
     }
   });
 }
