@@ -968,6 +968,8 @@ async function loadDashboard(){
   document.getElementById('active-plant-type').textContent=preset?preset.name:'';
   updatePlantAvatar(activeDevice.photo_url||null);
   renderDeviceList();renderPlantSwitcher();updateCalibrationBanner();fetchLastWatered();
+  // Write widget prefs via Capacitor Preferences plugin if running as native app
+  syncWidgetPrefs(activeDevice);
   // Show last known reading instantly while fresh fetch runs in background
   try{
     var cached=localStorage.getItem('moist_reading_'+activeDeviceId);
@@ -1669,6 +1671,17 @@ document.addEventListener('DOMContentLoaded',function(){
     }
   }
 })();
+
+// ── Widget SharedPreferences bridge ───────────────────────────────────────────
+function syncWidgetPrefs(device){
+  // Only runs when inside the Capacitor Android wrapper
+  if(!window.Capacitor||!window.Capacitor.Plugins||!window.Capacitor.Plugins.Preferences)return;
+  var P=window.Capacitor.Plugins.Preferences;
+  P.set({key:'moist_supabase_url',value:SUPABASE_URL});
+  P.set({key:'moist_supabase_key',value:SUPABASE_KEY});
+  P.set({key:'moist_device_id',value:device.device_id||''});
+  P.set({key:'moist_plant_name',value:device.plant_name||'My Plant'});
+}
 
 // ── Share card ────────────────────────────────────────────────────────────────
 function openSharePreview(){
