@@ -727,7 +727,13 @@ async function loadDashboard(){
   document.getElementById('active-plant-name').textContent=activeDevice.plant_name||'My Plant';
   var preset=activeDevice.plant_type&&PLANT_PRESETS[activeDevice.plant_type];
   document.getElementById('active-plant-type').textContent=preset?preset.name:'';
-  renderDeviceList();renderPlantSwitcher();fetchReadings();updateCalibrationBanner();fetchLastWatered();
+  renderDeviceList();renderPlantSwitcher();updateCalibrationBanner();fetchLastWatered();
+  // Show last known reading instantly while fresh fetch runs in background
+  try{
+    var cached=localStorage.getItem('moist_reading_'+activeDeviceId);
+    if(cached){var r=JSON.parse(cached);updateGauge(r.moisture,r.raw,r.status);}
+  }catch(e){}
+  fetchReadings();
   if(refreshTimer)clearInterval(refreshTimer);
   refreshTimer=setInterval(fetchReadings,10000);
 }
@@ -839,6 +845,10 @@ function pick(arr){return arr[Math.floor(Math.random()*arr.length)];}
 
 function updateGauge(moisture,raw,status){
   latestRawAdc=raw;
+  // Cache so we can restore instantly after a page reload
+  if(activeDeviceId){
+    try{localStorage.setItem('moist_reading_'+activeDeviceId,JSON.stringify({moisture:moisture,raw:raw,status:status}));}catch(e){}
+  }
 
   // Water-fill gauge (ch. 1)
   var fill=document.getElementById('water-fill');
