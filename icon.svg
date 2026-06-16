@@ -1,25 +1,72 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
-  <!-- Dark rounded background -->
-  <rect width="512" height="512" rx="96" fill="#0a0a0a"/>
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="45%" r="65%">
+      <stop offset="0%" stop-color="#E8FFF4"/>
+      <stop offset="100%" stop-color="#FFFFFF"/>
+    </radialGradient>
+    <radialGradient id="face" cx="42%" cy="36%" r="70%">
+      <stop offset="0%" stop-color="#33EE88"/>
+      <stop offset="100%" stop-color="#00C85A"/>
+    </radialGradient>
+    <radialGradient id="bump-l" cx="38%" cy="32%" r="65%">
+      <stop offset="0%" stop-color="#33EE88"/>
+      <stop offset="100%" stop-color="#00C85A"/>
+    </radialGradient>
+    <radialGradient id="bump-r" cx="38%" cy="32%" r="65%">
+      <stop offset="0%" stop-color="#33EE88"/>
+      <stop offset="100%" stop-color="#00C85A"/>
+    </radialGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="130%">
+      <feDropShadow dx="0" dy="8" stdDeviation="16" flood-color="#00C85A" flood-opacity="0.22"/>
+    </filter>
+  </defs>
 
-  <!-- Water drop body: tip at top, full circle at bottom -->
-  <path
-    d="M256 100
-       C 224 148, 140 238, 140 322
-       A 116 116 0 0 0 372 322
-       C 372 238, 288 148, 256 100
-       Z"
-    fill="#5aff7e"
-  />
+  <!-- App icon background -->
+  <rect width="512" height="512" rx="112" fill="url(#bg)"/>
 
-  <!-- Inner highlight for depth -->
-  <path
-    d="M256 148
-       C 238 178, 196 232, 196 296
-       A 62 62 0 0 0 230 350"
-    stroke="rgba(255,255,255,0.25)"
-    stroke-width="18"
-    stroke-linecap="round"
-    fill="none"
-  />
+  <!-- Frog group with shadow -->
+  <g filter="url(#shadow)">
+
+    <!-- Eye bump left -->
+    <circle cx="182" cy="178" r="66" fill="url(#bump-l)"/>
+    <!-- Eye bump right -->
+    <circle cx="330" cy="178" r="66" fill="url(#bump-r)"/>
+
+    <!-- Main face circle -->
+    <circle cx="256" cy="306" r="172" fill="url(#face)"/>
+
+    <!-- Mouth/chin area — slightly lighter -->
+    <ellipse cx="256" cy="390" rx="118" ry="68" fill="#00D96A" opacity="0.45"/>
+
+    <!-- Eye whites left -->
+    <circle cx="182" cy="172" r="48" fill="#FFFFFF"/>
+    <!-- Eye whites right -->
+    <circle cx="330" cy="172" r="48" fill="#FFFFFF"/>
+
+    <!-- Pupils left -->
+    <circle cx="188" cy="172" r="28" fill="#1A1A1A"/>
+    <!-- Pupils right -->
+    <circle cx="324" cy="172" r="28" fill="#1A1A1A"/>
+
+    <!-- Pupil shine left -->
+    <circle cx="196" cy="162" r="9" fill="#FFFFFF"/>
+    <!-- Pupil shine right -->
+    <circle cx="332" cy="162" r="9" fill="#FFFFFF"/>
+
+    <!-- Nostrils -->
+    <circle cx="240" cy="274" r="7" fill="rgba(0,100,40,0.18)"/>
+    <circle cx="272" cy="274" r="7" fill="rgba(0,100,40,0.18)"/>
+
+    <!-- Smile -->
+    <path d="M 200 340 Q 256 398 312 340"
+          stroke="rgba(255,255,255,0.85)" stroke-width="13"
+          stroke-linecap="round" fill="none"/>
+
+  </g>
+
+  <!-- Water drop badge — coral accent, bottom right -->
+  <circle cx="378" cy="378" r="54" fill="#FFFFFF"/>
+  <circle cx="378" cy="378" r="46" fill="#FF4081"/>
+  <path d="M 378 350 C 366 362, 352 374, 352 386 A 26 26 0 0 0 404 386 C 404 374, 390 362, 378 350 Z"
+        fill="#FFFFFF"/>
 </svg>
