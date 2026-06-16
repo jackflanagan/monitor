@@ -1205,13 +1205,13 @@ function updateGauge(moisture,raw,status){
   if(document.getElementById('m-battery')){document.getElementById('m-battery').textContent=moistureLabel.replace('\n',' ');}
   if(document.getElementById('m-signal')){document.getElementById('m-signal').textContent=raw!=null?'signal ok':'--';}
 
-  // Status pill + tagline (ch. 3 & 4)
+  // Status pill + tagline — driven by moisture % so all messages stay consistent
   var pill=document.getElementById('status-pill');
   var card=document.getElementById('gauge-card');
   pill.className='status-pill';card.className='gauge-card';
   var stateKey='ok';
-  if(status==='DRY'){stateKey='dry';pill.classList.add('pill-dry');card.classList.add('dry');}
-  else if(status==='WET'){stateKey='wet';pill.classList.add('pill-wet');card.classList.add('wet');}
+  if(moisture<30){stateKey='dry';pill.classList.add('pill-dry');card.classList.add('dry');}
+  else if(moisture>=70){stateKey='wet';pill.classList.add('pill-wet');card.classList.add('wet');}
   else{pill.classList.add('pill-ok');}
   document.getElementById('status-text').textContent=pick(STATUS_MSGS[stateKey]);
   var tagEl=document.getElementById('gauge-tagline');
@@ -1225,8 +1225,8 @@ function updateGauge(moisture,raw,status){
 var _lastEmoji='';
 function updatePlantEmoji(moisture){
   var emoji;
-  if(moisture<20)emoji='🥀';
-  else if(moisture<35)emoji='😟';
+  if(moisture<15)emoji='🥀';
+  else if(moisture<30)emoji='😟';
   else if(moisture<65)emoji='🌿';
   else if(moisture<80)emoji='🌱';
   else emoji='🫧';
@@ -2127,7 +2127,7 @@ async function fetchWateringPrediction(){
   var device=userDevices.find(function(d){return d.device_id===activeDeviceId;});
   var dryThreshold=device&&device.dry_threshold!=null?device.dry_threshold:30;
   var latest=data[data.length-1];
-  if(latest.status==='DRY'||latest.moisture<=dryThreshold){
+  if(latest.moisture<30||latest.moisture<=dryThreshold){
     headlineEl.textContent='Water your plant now';
     subEl.textContent='Moisture is already at or below the dry threshold';
     return;
