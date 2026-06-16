@@ -110,7 +110,7 @@
   /* Wave at top of fill */
   .water-fill::before{content:'';position:absolute;top:-8px;left:-50%;width:200%;height:16px;border-radius:40%;background:inherit;animation:wave 2.5s linear infinite}
   @keyframes wave{0%{transform:translateX(0) rotate(0deg)}100%{transform:translateX(25%) rotate(360deg)}}
-  .gauge-pct{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:56px;font-weight:900;letter-spacing:-0.04em;transition:color 0.6s;text-align:center;z-index:2;text-shadow:0 1px 4px rgba(0,0,0,0.15)}
+  .gauge-pct{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:32px;font-weight:900;letter-spacing:-0.02em;transition:color 0.6s;text-align:center;z-index:2;text-shadow:0 1px 4px rgba(0,0,0,0.15);line-height:1.1;padding:0 8px}
   .gauge-tagline{font-size:13px;color:var(--muted);font-family:var(--font-mono);margin-top:4px;text-align:center}
 
   .status-pill{display:inline-flex;align-items:center;gap:7px;padding:7px 16px;border-radius:99px;font-size:13px;font-weight:500;font-family:var(--font-mono);margin-top:16px;transition:all 0.4s}
@@ -193,6 +193,52 @@
   .calibrate-btn{width:100%;padding:13px;background:var(--surface2);border:1px solid var(--border);border-radius:12px;color:var(--text);font-family:var(--font-head);font-size:14px;font-weight:700;cursor:pointer;transition:all 0.2s;text-align:left}
   .calibrate-btn:hover{border-color:rgba(255,255,255,0.2)}
   .calibrate-btn:active{transform:scale(0.98)}
+
+  /* Calibration wizard overlay */
+  .cal-wizard{position:fixed;inset:0;z-index:1000;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 24px 32px;transform:translateY(100%);transition:transform 0.35s cubic-bezier(0.32,0.72,0,1);overflow-y:auto}
+  .cal-wizard.open{transform:translateY(0)}
+  .cal-wizard-close{position:absolute;top:20px;right:20px;background:none;border:none;cursor:pointer;color:var(--muted);padding:8px;line-height:0}
+  .cal-wizard-step{display:none;flex-direction:column;align-items:center;width:100%;max-width:380px;text-align:center}
+  .cal-wizard-step.active{display:flex}
+  .cal-wizard-num{font-size:11px;letter-spacing:0.12em;text-transform:uppercase;font-family:var(--font-mono);color:var(--muted);margin-bottom:16px}
+  .cal-wizard-icon{font-size:64px;margin-bottom:20px;line-height:1}
+  .cal-wizard-title{font-size:22px;font-weight:800;letter-spacing:-0.03em;margin-bottom:8px}
+  .cal-wizard-desc{font-size:14px;color:var(--muted);font-family:var(--font-mono);line-height:1.6;margin-bottom:28px}
+  .cal-wizard-countdown{width:90px;height:90px;border-radius:50%;border:3px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:36px;font-weight:900;font-family:var(--font-mono);margin:0 auto 12px;background:var(--surface)}
+  .cal-wizard-countdown.running{border-color:var(--green)}
+  .cal-wizard-reading{font-size:12px;color:var(--muted);font-family:var(--font-mono);margin-bottom:24px;min-height:18px}
+  .cal-wizard-result{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:20px;width:100%;margin-bottom:24px}
+  .cal-wizard-result-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;font-size:14px}
+  .cal-wizard-result-row:not(:last-child){border-bottom:1px solid var(--border)}
+  .cal-wizard-result-label{color:var(--muted);font-family:var(--font-mono);font-size:12px}
+  .cal-wizard-result-val{font-weight:800;font-size:20px}
+  .cal-wizard-btn{width:100%;padding:14px;background:var(--green);border:none;border-radius:14px;color:#fff;font-family:var(--font-head);font-size:15px;font-weight:800;cursor:pointer;transition:opacity 0.2s}
+  .cal-wizard-btn:disabled{opacity:0.4;cursor:not-allowed}
+  .cal-wizard-btn-ghost{background:none;border:1px solid var(--border);color:var(--muted);margin-top:10px}
+
+  /* Trend pill */
+  .trend-pill{display:none;align-items:center;gap:5px;padding:5px 12px;border-radius:99px;font-size:12px;font-weight:600;font-family:var(--font-mono);margin-top:8px}
+  .trend-pill.show{display:inline-flex}
+  .trend-down{background:rgba(255,64,129,0.12);color:#FF4081}
+  .trend-up{background:rgba(2,136,209,0.12);color:#0288D1}
+  .trend-stable{background:var(--surface2);color:var(--muted)}
+
+  /* Health score card */
+  .health-card{margin:0 16px 12px;background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:20px 24px;display:none;align-items:center;gap:20px}
+  .health-card.show{display:flex}
+  .health-grade{font-size:52px;font-weight:900;letter-spacing:-0.04em;flex-shrink:0;line-height:1}
+  .health-grade.grade-a,.health-grade.grade-b{color:var(--green)}
+  .health-grade.grade-c,.health-grade.grade-d{color:var(--amber)}
+  .health-grade.grade-f{color:#FF4081}
+  .health-title{font-size:14px;font-weight:700;margin-bottom:4px}
+  .health-sub{font-size:12px;color:var(--muted);font-family:var(--font-mono);line-height:1.5}
+
+  /* Watering prediction card */
+  .pred-card{margin:0 16px 12px;background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:18px 20px;display:none;align-items:center;gap:14px}
+  .pred-card.show{display:flex}
+  .pred-icon{font-size:28px;flex-shrink:0}
+  .pred-headline{font-size:14px;font-weight:700;margin-bottom:3px}
+  .pred-sub{font-size:12px;color:var(--muted);font-family:var(--font-mono)}
 
   /* Banners */
   .banner{margin:0 16px 10px;border-radius:14px;padding:12px 16px;display:none;align-items:center;gap:10px;font-size:13px;font-family:var(--font-mono)}
@@ -415,13 +461,14 @@
         <div class="water-gauge" id="water-gauge">
           <div class="water-fill fill-ok" id="water-fill" style="height:0%"></div>
         </div>
-        <div class="gauge-pct" id="gauge-pct" style="color:var(--text)">--%</div>
+        <div class="gauge-pct" id="gauge-pct" style="color:var(--text)">...</div>
       </div>
       <div class="gauge-tagline" id="gauge-tagline"></div>
       <div class="status-pill pill-ok" id="status-pill">
         <span class="pill-dot"></span>
         <span id="status-text">Waiting for reading</span>
       </div>
+      <div class="trend-pill" id="trend-pill"></div>
       <div class="last-watered-label" id="last-watered-label" style="display:none"></div>
       <button class="water-btn" id="water-btn" onclick="doMarkWatered()" style="position:relative">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>
@@ -431,9 +478,27 @@
 
     <!-- Metrics icon row (ch. 8) -->
     <div class="metrics" id="metrics-row">
-      <div class="metric-chip">🔋 <span id="m-battery">--%</span></div>
-      <div class="metric-chip">📶 <span id="m-signal">--</span></div>
+      <div class="metric-chip">💧 <span id="m-battery">--</span></div>
+      <div class="metric-chip">📡 <span id="m-signal">--</span></div>
       <div class="metric-chip">🌡️ <span id="m-temp">--°C</span></div>
+    </div>
+
+    <!-- Health score card -->
+    <div class="health-card" id="health-card">
+      <div class="health-grade" id="health-grade">?</div>
+      <div>
+        <div class="health-title" id="health-title">Plant health</div>
+        <div class="health-sub" id="health-sub">Loading…</div>
+      </div>
+    </div>
+
+    <!-- Watering prediction card -->
+    <div class="pred-card" id="pred-card">
+      <div class="pred-icon">🕐</div>
+      <div>
+        <div class="pred-headline" id="pred-headline">Calculating…</div>
+        <div class="pred-sub" id="pred-sub">Based on recent moisture trend</div>
+      </div>
     </div>
 
     <div class="history-card" onclick="openHistory()" style="cursor:pointer">
@@ -588,6 +653,11 @@
           <option value="365">1 year</option>
         </select>
       </div>
+    </div>
+    <div class="calibrate-section" style="margin-top:12px">
+      <div class="calibrate-label">Sensor accuracy</div>
+      <div style="font-size:13px;color:var(--muted);font-family:var(--font-mono);margin-bottom:14px;line-height:1.6">Run the guided wizard to calibrate moisture readings for your specific sensor and soil type.</div>
+      <button class="calibrate-btn" onclick="openCalibrationWizard()">🔬 Calibrate sensor</button>
     </div>
     <button class="btn-primary" onclick="saveSettings()" style="margin-top:20px">Save settings</button>
   </div>
@@ -831,15 +901,20 @@ async function fetchReadings(){
   } else {
     document.getElementById('banner-offline').classList.remove('show');
   }
-  deviceMoisture[activeDeviceId]=latest.moisture;
-  updateGauge(latest.moisture,latest.raw_adc,latest.status);
+  var calibratedMoisture=recalcMoisture(latest.raw_adc);
+  var displayMoisture=calibratedMoisture!=null?calibratedMoisture:latest.moisture;
+  deviceMoisture[activeDeviceId]=displayMoisture;
+  updateGauge(displayMoisture,latest.raw_adc,latest.status);
   renderPlantSwitcher();
   historyData=data.slice(0,12).reverse();
   renderBars();
+  updateTrendPill(data.slice().reverse());
   document.getElementById('conn-dot').className='conn-dot live';
   document.getElementById('conn-label').textContent='Live · Supabase';
   var t=new Date(latest.created_at);
   document.getElementById('last-updated').textContent='Last reading '+t.getHours()+':'+String(t.getMinutes()).padStart(2,'0')+':'+String(t.getSeconds()).padStart(2,'0');
+  fetchHealthScore();
+  fetchWateringPrediction();
 }
 
 // ── Conversational status messages (ch. 3) ────────────────────────────────────
@@ -870,13 +945,23 @@ function updateGauge(moisture,raw,status){
   else if(moisture>70){fill.classList.add('fill-wet');}
   else{fill.classList.add('fill-ok');}
 
-  // Percentage text (ch. 2)
-  document.getElementById('gauge-pct').textContent=moisture+'%';
-  document.getElementById('gauge-pct').style.color='var(--text)';
+  // Descriptive label (replaces raw %)
+  var moistureLabel=(function(m){
+    if(m<15)return'Bone dry';
+    if(m<30)return'Thirsty';
+    if(m<45)return'Getting\nthere';
+    if(m<65)return'Happy';
+    if(m<80)return'Lush';
+    return'Soaked';
+  })(moisture);
+  var pctEl=document.getElementById('gauge-pct');
+  pctEl.style.whiteSpace='pre-line';
+  pctEl.textContent=moistureLabel;
+  pctEl.style.color='var(--text)';
 
-  // Metrics row (ch. 8) — raw ADC shown as battery placeholder; extend when real fields available
-  if(document.getElementById('m-battery')){document.getElementById('m-battery').textContent=moisture+'%';}
-  if(document.getElementById('m-signal')){document.getElementById('m-signal').textContent=raw!=null?raw:'--';}
+  // Metrics row — show descriptive label instead of raw values
+  if(document.getElementById('m-battery')){document.getElementById('m-battery').textContent=moistureLabel.replace('\n',' ');}
+  if(document.getElementById('m-signal')){document.getElementById('m-signal').textContent=raw!=null?'signal ok':'--';}
 
   // Status pill + tagline (ch. 3 & 4)
   var pill=document.getElementById('status-pill');
@@ -1375,8 +1460,258 @@ document.addEventListener('DOMContentLoaded',function(){
   }
 })();
 
+// ── Calibration Wizard ────────────────────────────────────────────────────────
+var wizardDryAdc=null,wizardWetAdc=null,wizardCountdownTimer=null,wizardDeviceId=null;
+function openCalibrationWizard(){
+  wizardDeviceId=activeDeviceId;
+  wizardDryAdc=null;wizardWetAdc=null;
+  if(wizardCountdownTimer){clearInterval(wizardCountdownTimer);wizardCountdownTimer=null;}
+  ['1','2','3'].forEach(function(n){
+    document.getElementById('cwiz-step-'+n).classList.remove('active');
+  });
+  document.getElementById('cwiz-step-1').classList.add('active');
+  document.getElementById('cwiz-count-1').textContent='10';
+  document.getElementById('cwiz-count-1').classList.remove('running');
+  document.getElementById('cwiz-count-2').textContent='10';
+  document.getElementById('cwiz-count-2').classList.remove('running');
+  document.getElementById('cwiz-adc-1').textContent='—';
+  document.getElementById('cwiz-adc-2').textContent='—';
+  var b1=document.getElementById('cwiz-btn-1');
+  b1.disabled=false;b1.textContent='Start 10 second countdown';
+  var b2=document.getElementById('cwiz-btn-2');
+  b2.disabled=false;b2.textContent='Start 10 second countdown';
+  var b3=document.getElementById('cwiz-btn-3');
+  b3.disabled=false;b3.textContent='Save calibration';
+  document.getElementById('cal-wizard').classList.add('open');
+}
+function closeCalibrationWizard(){
+  if(wizardCountdownTimer){clearInterval(wizardCountdownTimer);wizardCountdownTimer=null;}
+  document.getElementById('cal-wizard').classList.remove('open');
+}
+async function pollLatestAdc(){
+  if(!wizardDeviceId)return null;
+  var {data}=await sb.from('readings').select('raw_adc').eq('device_id',wizardDeviceId).order('created_at',{ascending:false}).limit(1);
+  return data&&data.length?data[0].raw_adc:null;
+}
+function startWizardStep(step){
+  var btn=document.getElementById('cwiz-btn-'+step);
+  var countEl=document.getElementById('cwiz-count-'+step);
+  var adcEl=document.getElementById('cwiz-adc-'+step);
+  btn.disabled=true;
+  countEl.classList.add('running');
+  var seconds=10;
+  countEl.textContent=seconds;
+  var adcSamples=[];
+  wizardCountdownTimer=setInterval(async function(){
+    var adc=await pollLatestAdc();
+    if(adc!=null){adcSamples.push(adc);adcEl.textContent=adc;}
+    seconds--;
+    countEl.textContent=Math.max(seconds,0);
+    if(seconds<=0){
+      clearInterval(wizardCountdownTimer);wizardCountdownTimer=null;
+      countEl.classList.remove('running');
+      var finalAdc=adcSamples.length
+        ?Math.round(adcSamples.reduce(function(a,b){return a+b;},0)/adcSamples.length)
+        :(latestRawAdc||0);
+      if(step===1){
+        wizardDryAdc=finalAdc;
+        document.getElementById('cwiz-step-1').classList.remove('active');
+        document.getElementById('cwiz-step-2').classList.add('active');
+      } else {
+        wizardWetAdc=finalAdc;
+        document.getElementById('cwiz-step-2').classList.remove('active');
+        document.getElementById('cwiz-step-3').classList.add('active');
+        document.getElementById('cwiz-res-dry').textContent=wizardDryAdc;
+        document.getElementById('cwiz-res-wet').textContent=wizardWetAdc;
+        document.getElementById('cwiz-res-range').textContent=Math.abs(wizardDryAdc-wizardWetAdc)+' ADC';
+      }
+    }
+  },1000);
+}
+async function saveCalibrationWizard(){
+  if(wizardDryAdc==null||wizardWetAdc==null){showToast('Missing readings — restart the wizard');return;}
+  var btn=document.getElementById('cwiz-btn-3');
+  btn.disabled=true;btn.textContent='Saving…';
+  var cal={dry_value:wizardDryAdc,wet_value:wizardWetAdc};
+  var {error}=await sb.from('devices').update({
+    calibration:cal,
+    dry_threshold:wizardDryAdc,
+    wet_threshold:wizardWetAdc
+  }).eq('device_id',wizardDeviceId).eq('user_id',currentUser.id);
+  if(error){showToast('Save failed: '+error.message);btn.disabled=false;btn.textContent='Save calibration';return;}
+  var device=userDevices.find(function(d){return d.device_id===wizardDeviceId;});
+  if(device){device.calibration=cal;device.dry_threshold=wizardDryAdc;device.wet_threshold=wizardWetAdc;}
+  showToast('Sensor calibrated!',true);
+  closeCalibrationWizard();
+  fetchReadings();
+}
+
+// Recalculate moisture from raw ADC using saved calibration values
+function recalcMoisture(rawAdc){
+  var device=userDevices.find(function(d){return d.device_id===activeDeviceId;});
+  var cal=device&&device.calibration;
+  if(!cal||rawAdc==null)return null;
+  var dryVal=Number(cal.dry_value),wetVal=Number(cal.wet_value);
+  if(!dryVal||!wetVal||dryVal===wetVal)return null;
+  // Capacitive sensors: higher ADC = dryer
+  return Math.max(0,Math.min(100,Math.round((dryVal-rawAdc)/(dryVal-wetVal)*100)));
+}
+
+// ── Trend indicator ───────────────────────────────────────────────────────────
+function updateTrendPill(readings){
+  var pill=document.getElementById('trend-pill');
+  var gauge=document.getElementById('water-gauge');
+  if(!pill)return;
+  if(!readings||readings.length<2){pill.classList.remove('show');return;}
+  var last5=readings.slice(-5);
+  var delta=last5[last5.length-1].moisture-last5[0].moisture;
+  pill.className='trend-pill show';
+  if(delta<-5){pill.classList.add('trend-down');pill.textContent='↓ Drying fast';}
+  else if(delta>5){pill.classList.add('trend-up');pill.textContent='↑ Getting wetter';}
+  else{pill.classList.add('trend-stable');pill.textContent='→ Stable';}
+  if(gauge){
+    if(delta<-10)gauge.style.boxShadow='inset 0 0 0 3px rgba(255,64,129,0.4)';
+    else if(delta<-5)gauge.style.boxShadow='inset 0 0 0 2px rgba(255,64,129,0.18)';
+    else gauge.style.boxShadow='';
+  }
+}
+
+// ── Health score ──────────────────────────────────────────────────────────────
+async function fetchHealthScore(){
+  var card=document.getElementById('health-card');
+  if(!card||!activeDeviceId)return;
+  var since=new Date(Date.now()-7*86400000).toISOString();
+  var {data}=await sb.from('readings').select('moisture,status,created_at').eq('device_id',activeDeviceId).gte('created_at',since).order('created_at');
+  var gradeEl=document.getElementById('health-grade');
+  var titleEl=document.getElementById('health-title');
+  var subEl=document.getElementById('health-sub');
+  card.classList.add('show');
+  var hasRecent=data&&data.some(function(r){return new Date(r.created_at)>new Date(Date.now()-86400000);});
+  if(!data||data.length<10){
+    gradeEl.textContent='?';gradeEl.className='health-grade';
+    titleEl.textContent='Plant health';
+    subEl.textContent='Not enough data yet — check back in a few days';
+    return;
+  }
+  if(!hasRecent){
+    gradeEl.textContent='F';gradeEl.className='health-grade grade-f';
+    titleEl.textContent='Plant health — F';
+    subEl.textContent='No reading in the last 24 hours';
+    return;
+  }
+  var okCount=data.filter(function(r){return r.status==='OK';}).length;
+  var pct=okCount/data.length;
+  var grade,desc;
+  if(pct>=0.90){grade='A';desc='your plant has been well looked after';}
+  else if(pct>=0.75){grade='B';desc='good care — a few dry or wet spells';}
+  else if(pct>=0.50){grade='C';desc='some inconsistency in moisture levels';}
+  else if(pct>=0.25){grade='D';desc='plant is often outside its ideal range';}
+  else{grade='F';desc='plant has been struggling with moisture';}
+  gradeEl.textContent=grade;
+  gradeEl.className='health-grade grade-'+grade.toLowerCase();
+  titleEl.textContent='Plant health';
+  subEl.textContent='Based on '+data.length+' readings over 7 days — '+desc;
+}
+
+// ── Watering prediction ───────────────────────────────────────────────────────
+async function fetchWateringPrediction(){
+  var card=document.getElementById('pred-card');
+  if(!card||!activeDeviceId)return;
+  var since=new Date(Date.now()-86400000).toISOString();
+  var {data}=await sb.from('readings').select('moisture,status,created_at').eq('device_id',activeDeviceId).gte('created_at',since).order('created_at');
+  var headlineEl=document.getElementById('pred-headline');
+  var subEl=document.getElementById('pred-sub');
+  card.classList.add('show');
+  if(!data||data.length<5){
+    headlineEl.textContent='Not enough data to predict yet';
+    subEl.textContent='Need at least 5 readings in the last 24 hours';
+    return;
+  }
+  var device=userDevices.find(function(d){return d.device_id===activeDeviceId;});
+  var dryThreshold=device&&device.dry_threshold!=null?device.dry_threshold:30;
+  var latest=data[data.length-1];
+  if(latest.status==='DRY'||latest.moisture<=dryThreshold){
+    headlineEl.textContent='Water your plant now';
+    subEl.textContent='Moisture is already at or below the dry threshold';
+    return;
+  }
+  var hoursSpan=(new Date(latest.created_at)-new Date(data[0].created_at))/3600000;
+  if(hoursSpan<0.5){
+    headlineEl.textContent='Not enough data to predict yet';
+    subEl.textContent='Readings only span '+Math.round(hoursSpan*60)+' minutes — check back later';
+    return;
+  }
+  var moistureDrop=data[0].moisture-latest.moisture;
+  var dropPerHour=moistureDrop/hoursSpan;
+  if(dropPerHour<=0.2){
+    headlineEl.textContent='Plant is well hydrated';
+    subEl.textContent='Moisture is stable or rising — no watering needed';
+    return;
+  }
+  var hoursLeft=(latest.moisture-dryThreshold)/dropPerHour;
+  var text;
+  if(hoursLeft<1)text='less than an hour';
+  else if(hoursLeft<24){var h=Math.round(hoursLeft);text='approximately '+h+' hour'+(h===1?'':'s');}
+  else{var d=Math.round(hoursLeft/24);text='approximately '+d+' day'+(d===1?'':'s');}
+  headlineEl.textContent='Water needed in '+text;
+  subEl.textContent='Drying at '+dropPerHour.toFixed(1)+'% per hour based on last 24h';
+}
+
 init();
 checkNotifStatus();
 </script>
+
+<!-- Calibration wizard overlay -->
+<div id="cal-wizard" class="cal-wizard" role="dialog" aria-modal="true">
+  <button class="cal-wizard-close" onclick="closeCalibrationWizard()" aria-label="Close">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+  </button>
+
+  <!-- Step 1: Dry air -->
+  <div class="cal-wizard-step active" id="cwiz-step-1">
+    <div class="cal-wizard-num">Step 1 of 3</div>
+    <div class="cal-wizard-icon">💨</div>
+    <div class="cal-wizard-title">Hold sensor in open air</div>
+    <div class="cal-wizard-desc">Remove the sensor from the soil and hold it in the air. Keep still while we take a dry baseline reading.</div>
+    <div class="cal-wizard-countdown" id="cwiz-count-1">10</div>
+    <div class="cal-wizard-reading">ADC reading: <span id="cwiz-adc-1">—</span></div>
+    <button class="cal-wizard-btn" id="cwiz-btn-1" onclick="startWizardStep(1)">Start 10 second countdown</button>
+  </div>
+
+  <!-- Step 2: Wet -->
+  <div class="cal-wizard-step" id="cwiz-step-2">
+    <div class="cal-wizard-num">Step 2 of 3</div>
+    <div class="cal-wizard-icon">🥛</div>
+    <div class="cal-wizard-title">Place probes in water</div>
+    <div class="cal-wizard-desc">Submerge the sensor probes fully in a glass of water. Keep still while we take a wet reading.</div>
+    <div class="cal-wizard-countdown" id="cwiz-count-2">10</div>
+    <div class="cal-wizard-reading">ADC reading: <span id="cwiz-adc-2">—</span></div>
+    <button class="cal-wizard-btn" id="cwiz-btn-2" onclick="startWizardStep(2)">Start 10 second countdown</button>
+  </div>
+
+  <!-- Step 3: Confirm -->
+  <div class="cal-wizard-step" id="cwiz-step-3">
+    <div class="cal-wizard-num">Step 3 of 3</div>
+    <div class="cal-wizard-icon">🌱</div>
+    <div class="cal-wizard-title">Place sensor back in soil</div>
+    <div class="cal-wizard-desc">Your sensor is calibrated. Put it back in your plant pot and the readings will now reflect your specific sensor.</div>
+    <div class="cal-wizard-result">
+      <div class="cal-wizard-result-row">
+        <span class="cal-wizard-result-label">Dry air reading</span>
+        <span class="cal-wizard-result-val" id="cwiz-res-dry">—</span>
+      </div>
+      <div class="cal-wizard-result-row">
+        <span class="cal-wizard-result-label">In water reading</span>
+        <span class="cal-wizard-result-val" id="cwiz-res-wet">—</span>
+      </div>
+      <div class="cal-wizard-result-row">
+        <span class="cal-wizard-result-label">Calibrated range</span>
+        <span class="cal-wizard-result-val" id="cwiz-res-range">—</span>
+      </div>
+    </div>
+    <button class="cal-wizard-btn" id="cwiz-btn-3" onclick="saveCalibrationWizard()">Save calibration</button>
+    <button class="cal-wizard-btn cal-wizard-btn-ghost" onclick="closeCalibrationWizard()" style="margin-top:10px">Cancel</button>
+  </div>
+</div>
 </body>
 </html>
