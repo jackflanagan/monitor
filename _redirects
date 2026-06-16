@@ -4,5 +4,3 @@
 # Serve privacy policy without .html extension
 /privacy    /privacy.html    200
 
-# SPA fallback — must be last, Cloudflare serves real files before this rule
-/*    /index.html    200
