@@ -4,9 +4,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="theme-color" content="#1a4423">
+<meta name="theme-color" content="#ffffff">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Moist">
 <title>Moist — Soil Monitor</title>
 <link rel="manifest" href="/manifest.json">
@@ -17,23 +17,25 @@
 <script src="/src/utils.js"></script>
 <style>
   :root {
-    --green:#2dff6e;--green-dim:#0d3a1a;         /* electric lime — CTAs, logo, links */
-    --green2:#00ffcc;--green2-dim:#004d3a;        /* electric mint — status, tabs, pills */
-    --amber:#ffd500;--amber-dim:#3a2a00;
-    --blue:#00d4ff;--blue-dim:#003a50;
-    --bg:#1a4423;--surface:#224f2b;--surface2:#2a5e34;
-    --border:rgba(45,255,110,0.3);--text:#ffffff;--muted:#a8ddb5;
+    --green:#00E676;--green-dim:#D0FFF0;         /* mint green — CTAs, logo, links */
+    --green2:#FF4081;--green2-dim:#FFE0EC;        /* hot coral — badges, active states */
+    --violet:#7C4DFF;--violet-dim:#EDE7FF;        /* electric violet — tags, secondary btns */
+    --amber:#FF9800;--amber-dim:#FFF3E0;
+    --blue:#0288D1;--blue-dim:#E1F5FE;
+    --bg:#FFFFFF;--surface:#FFFFFF;--surface2:#F5F5F5;
+    --border:rgba(0,0,0,0.08);--text:#1A1A1A;--muted:#757575;
     --font-head:'Cabinet Grotesk',sans-serif;--font-mono:'DM Mono',monospace;
-    --gauge-track:#1a2e1e;--error-bg:#1c1010;--error-border:#3a1a1a;
+    --gauge-track:rgba(0,0,0,0.06);--error-bg:#FFF0F0;--error-border:#FFCCCC;
   }
-  html[data-theme="light"] {
-    --green:#00a83c;--green-dim:#d4f5e3;
-    --green2:#00a88a;--green2-dim:#c8f5ef;
-    --amber:#c07a00;--amber-dim:#fff3c0;
-    --blue:#0088bb;--blue-dim:#d0f0ff;
-    --bg:#f5fbf6;--surface:#ffffff;--surface2:#edf7ef;
-    --border:rgba(0,140,70,0.2);--text:#0d1f10;--muted:#4a7055;
-    --gauge-track:rgba(0,0,0,0.08);--error-bg:#fff0f0;--error-border:#ffc8c8;
+  html[data-theme="dark"] {
+    --green:#00E676;--green-dim:#003D1A;
+    --green2:#FF4081;--green2-dim:#3D0018;
+    --violet:#7C4DFF;--violet-dim:#1A0A3D;
+    --amber:#FFC107;--amber-dim:#2A1A00;
+    --blue:#29B6F6;--blue-dim:#001A26;
+    --bg:#0A0A0A;--surface:#141414;--surface2:#1C1C1C;
+    --border:rgba(255,255,255,0.08);--text:#FFFFFF;--muted:#888888;
+    --gauge-track:#1A1A1A;--error-bg:#1C0A0A;--error-border:#3D1A1A;
   }
   *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
   body{background:var(--bg);color:var(--text);font-family:var(--font-head);min-height:100vh;overflow-x:hidden}
@@ -50,7 +52,7 @@
   .field{margin-bottom:14px}
   .field label{display:block;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);font-family:var(--font-mono);margin-bottom:7px}
   .field input{width:100%;padding:13px 14px;background:var(--surface);border:1px solid var(--border);border-radius:12px;color:var(--text);font-family:var(--font-mono);font-size:14px;outline:none;transition:border-color 0.2s}
-  .field input:focus{border-color:rgba(255,255,255,0.2)}
+  .field input:focus{border-color:var(--green)}
   .btn-primary{width:100%;padding:15px;background:var(--green);color:#000;border:none;border-radius:14px;font-family:var(--font-head);font-size:15px;font-weight:800;cursor:pointer;transition:opacity 0.2s;letter-spacing:-0.01em;margin-top:4px}
   .btn-primary:hover{opacity:0.9}
   .btn-primary:disabled{opacity:0.4;cursor:not-allowed}
@@ -58,7 +60,7 @@
   .divider-line{flex:1;height:1px;background:var(--border)}
   .divider span{font-size:12px;color:var(--muted);font-family:var(--font-mono)}
   .btn-google{width:100%;padding:13px;background:var(--surface);border:1px solid var(--border);border-radius:14px;color:var(--text);font-family:var(--font-head);font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;transition:border-color 0.2s}
-  .btn-google:hover{border-color:rgba(255,255,255,0.2)}
+  .btn-google:hover{border-color:var(--green)}
   .btn-google svg{width:18px;height:18px;flex-shrink:0}
   .auth-switch{text-align:center;margin-top:24px;font-size:13px;color:var(--muted)}
   .auth-switch a{color:var(--green);text-decoration:none;font-weight:700;cursor:pointer}
@@ -89,7 +91,7 @@
   .icon-btn svg{width:16px;height:16px}
 
   .gauge-card{margin:0 16px 16px;background:var(--surface);border:1px solid var(--border);border-radius:24px;padding:28px 24px 24px;display:flex;flex-direction:column;align-items:center;position:relative;overflow:hidden}
-  .gauge-card::before{content:'';position:absolute;top:-60px;left:50%;transform:translateX(-50%);width:200px;height:200px;border-radius:50%;background:radial-gradient(circle,rgba(0,223,162,0.08) 0%,transparent 70%);pointer-events:none;transition:background 0.6s}
+  .gauge-card::before{content:'';position:absolute;top:-60px;left:50%;transform:translateX(-50%);width:200px;height:200px;border-radius:50%;background:radial-gradient(circle,rgba(0,230,118,0.08) 0%,transparent 70%);pointer-events:none;transition:background 0.6s}
   .gauge-card.dry::before{background:radial-gradient(circle,rgba(255,184,48,0.08) 0%,transparent 70%)}
   .gauge-card.wet::before{background:radial-gradient(circle,rgba(74,173,255,0.08) 0%,transparent 70%)}
   .gauge-wrap{position:relative;width:200px;height:115px;margin-bottom:8px}
@@ -210,8 +212,8 @@
 
   /* Field select */
   .field select{width:100%;padding:13px 14px;background:var(--surface);border:1px solid var(--border);border-radius:12px;color:var(--text);font-family:var(--font-mono);font-size:14px;outline:none;appearance:none;cursor:pointer;transition:border-color 0.2s;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%23666' d='M6 8L0 0h12z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center}
-  .field select:focus{border-color:rgba(255,255,255,0.2)}
-  .field select option{background:#141414;color:#f0f0f0}
+  .field select:focus{border-color:var(--green)}
+  .field select option{background:var(--surface);color:var(--text)}
 
   /* History screen */
   .history-screen-wrap{padding:0 0 48px}
@@ -382,7 +384,7 @@
       <div class="gauge-wrap">
         <svg viewBox="0 0 200 115" xmlns="http://www.w3.org/2000/svg">
           <path id="gauge-track-path" d="M20,105 A80,80 0 0,1 180,105" fill="none" stroke-width="12" stroke-linecap="round"/>
-          <path id="gauge-arc" d="M20,105 A80,80 0 0,1 180,105" fill="none" stroke="#00ffcc" stroke-width="12" stroke-linecap="round" stroke-dasharray="251" stroke-dashoffset="251"/>
+          <path id="gauge-arc" d="M20,105 A80,80 0 0,1 180,105" fill="none" stroke="#00E676" stroke-width="12" stroke-linecap="round" stroke-dasharray="251" stroke-dashoffset="251"/>
         </svg>
         <div class="gauge-pct" id="gauge-pct" style="color:var(--muted)">--%</div>
       </div>
@@ -426,7 +428,7 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
       Refresh now
     </button>
-    <button class="refresh-btn" id="notif-btn" onclick="enableNotifications()" style="margin-top:10px;border-color:rgba(90,255,126,0.3);color:var(--green)">
+    <button class="refresh-btn" id="notif-btn" onclick="enableNotifications()" style="margin-top:10px;border-color:rgba(0,230,118,0.3);color:var(--green)">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
       <span id="notif-btn-text">Enable notifications</span>
     </button>
@@ -602,14 +604,14 @@ function applyTheme(theme){
   var moon=document.getElementById('theme-icon-moon');
   if(sun&&moon){sun.style.display=theme==='light'?'none':'';moon.style.display=theme==='light'?'':'none';}
   var meta=document.querySelector('meta[name="theme-color"]');
-  if(meta)meta.setAttribute('content',theme==='light'?'#f5fbf6':'#1a4423');
+  if(meta)meta.setAttribute('content',theme==='light'?'#ffffff':'#0a0a0a');
 }
 function toggleTheme(){
   var next=document.documentElement.getAttribute('data-theme')==='light'?'dark':'light';
   localStorage.setItem('moist_theme',next);
   applyTheme(next);
 }
-applyTheme(localStorage.getItem('moist_theme')||'dark');
+applyTheme(localStorage.getItem('moist_theme')||'light');
 
 var SUPABASE_URL='https://usoirglmgylpyokmusez.supabase.co';
 var SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVzb2lyZ2xtZ3lscHlva211c2V6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY3NDY1MTgsImV4cCI6MjA5MjMyMjUxOH0.MOtJbBJP3WpqD7EZFnrRGUM-zuR4nyR02qIF-FK4Ncg';

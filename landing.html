@@ -3,47 +3,47 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="theme-color" content="#0a0a0a">
+<meta name="theme-color" content="#ffffff">
 <meta name="description" content="Moist — the cute frog-shaped plant moisture sensor that tells you exactly when to water your plants, from anywhere in the world.">
 <title>Moist — Never kill a plant again</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Cabinet+Grotesk:wght@400;500;700;800;900&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   :root {
-    --green: #5aff7e;
-    --green-dim: #1a3a22;
-    --bg: #0a0a0a;
-    --surface: #141414;
-    --surface2: #1c1c1c;
-    --border: rgba(255,255,255,0.07);
-    --border-hover: rgba(255,255,255,0.2);
-    --text: #f0f0f0;
-    --muted: #666;
+    --green: #00E676;
+    --green-dim: #D0FFF0;
+    --bg: #FFFFFF;
+    --surface: #FFFFFF;
+    --surface2: #F5F5F5;
+    --border: rgba(0,0,0,0.08);
+    --border-hover: rgba(0,0,0,0.18);
+    --text: #1A1A1A;
+    --muted: #757575;
     --font-head: 'Cabinet Grotesk', sans-serif;
     --font-mono: 'DM Mono', monospace;
+    --nav-bg: rgba(255,255,255,0.92);
+    --phone-body: #E0E0E0;
+    --phone-notch: #C8C8C8;
+    --phone-notch-bar: #B0B0B0;
+    --phone-screen: #F5F5F5;
+    --pricing-featured: #E8FFF5;
+  }
+  html[data-theme="dark"] {
+    --green: #00E676;
+    --green-dim: #003D1A;
+    --bg: #0A0A0A;
+    --surface: #141414;
+    --surface2: #1C1C1C;
+    --border: rgba(255,255,255,0.07);
+    --border-hover: rgba(255,255,255,0.2);
+    --text: #F0F0F0;
+    --muted: #666;
     --nav-bg: rgba(10,10,10,0.88);
     --phone-body: #111;
     --phone-notch: #000;
     --phone-notch-bar: #1c1c1c;
     --phone-screen: #0a0a0a;
     --pricing-featured: #0f1f12;
-  }
-  html[data-theme="light"] {
-    --green: #00a83c;
-    --green-dim: #d4f5e3;
-    --bg: #f9fafb;
-    --surface: #ffffff;
-    --surface2: #f0f4f1;
-    --border: rgba(0,0,0,0.08);
-    --border-hover: rgba(0,0,0,0.15);
-    --text: #0d1a0f;
-    --muted: #6b7c71;
-    --nav-bg: rgba(249,250,251,0.92);
-    --phone-body: #e0e0e0;
-    --phone-notch: #c8c8c8;
-    --phone-notch-bar: #b0b0b0;
-    --phone-screen: #f9fafb;
-    --pricing-featured: #e8f5ed;
   }
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   html { scroll-behavior: smooth; }
@@ -80,7 +80,7 @@
   }
   .hero::before {
     content: ''; position: absolute; inset: 0;
-    background: radial-gradient(ellipse 70% 55% at 50% 30%, rgba(90,255,126,0.07) 0%, transparent 70%);
+    background: radial-gradient(ellipse 70% 55% at 50% 30%, rgba(0,230,118,0.07) 0%, transparent 70%);
     pointer-events: none;
   }
   .hero-inner {
@@ -89,7 +89,7 @@
   }
   .hero-eyebrow {
     display: inline-flex; align-items: center; gap: 8px;
-    background: var(--green-dim); border: 1px solid rgba(90,255,126,0.25);
+    background: var(--green-dim); border: 1px solid rgba(0,230,118,0.25);
     border-radius: 99px; padding: 6px 14px;
     font-size: 12px; font-family: var(--font-mono); color: var(--green); margin-bottom: 24px;
   }
@@ -127,7 +127,7 @@
   .phone-wrap { display: flex; justify-content: center; align-items: center; position: relative; }
   .phone {
     width: 240px; background: var(--phone-body); border-radius: 36px; padding: 12px;
-    box-shadow: 0 0 0 1px rgba(255,255,255,0.1), 0 40px 80px rgba(0,0,0,0.7), 0 0 60px rgba(90,255,126,0.08);
+    box-shadow: 0 0 0 1px rgba(255,255,255,0.1), 0 40px 80px rgba(0,0,0,0.7), 0 0 60px rgba(0,230,118,0.08);
     position: relative;
   }
   .phone-notch {
@@ -156,7 +156,7 @@
   .phone-glow {
     position: absolute; bottom: -30px; left: 50%; transform: translateX(-50%);
     width: 160px; height: 60px;
-    background: radial-gradient(ellipse, rgba(90,255,126,0.25) 0%, transparent 70%);
+    background: radial-gradient(ellipse, rgba(0,230,118,0.25) 0%, transparent 70%);
     pointer-events: none;
   }
 
@@ -194,7 +194,7 @@
   }
   .step-num {
     font-size: 64px; font-weight: 900; letter-spacing: -0.04em; line-height: 1;
-    color: rgba(90,255,126,0.12); margin-bottom: 20px; font-family: var(--font-head);
+    color: rgba(0,230,118,0.12); margin-bottom: 20px; font-family: var(--font-head);
   }
   .step-icon { font-size: 32px; margin-bottom: 14px; display: block; }
   .step-title { font-size: 18px; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 10px; }
@@ -210,7 +210,7 @@
     background: var(--surface2); border: 1px solid var(--border); border-radius: 18px;
     padding: 26px; transition: border-color 0.2s;
   }
-  .feature-card:hover { border-color: rgba(90,255,126,0.2); }
+  .feature-card:hover { border-color: rgba(0,230,118,0.2); }
   .feature-icon { font-size: 30px; margin-bottom: 14px; display: block; }
   .feature-title { font-size: 16px; font-weight: 800; letter-spacing: -0.01em; margin-bottom: 8px; }
   .feature-body { font-size: 13px; color: var(--muted); line-height: 1.65; }
@@ -229,7 +229,7 @@
   }
   .frog-placeholder::before {
     content: ''; position: absolute; inset: 0;
-    background: radial-gradient(ellipse 60% 60% at 50% 40%, rgba(90,255,126,0.06) 0%, transparent 70%);
+    background: radial-gradient(ellipse 60% 60% at 50% 40%, rgba(0,230,118,0.06) 0%, transparent 70%);
   }
   .frog-emoji { font-size: 96px; line-height: 1; }
   .frog-caption { font-size: 12px; color: var(--muted); font-family: var(--font-mono); }
@@ -242,7 +242,7 @@
     border-radius: 12px; color: var(--text); font-family: var(--font-mono); font-size: 14px;
     outline: none; transition: border-color 0.2s;
   }
-  .waitlist-input:focus { border-color: rgba(90,255,126,0.4); }
+  .waitlist-input:focus { border-color: rgba(0,230,118,0.4); }
   .waitlist-input::placeholder { color: var(--muted); }
   .waitlist-btn {
     padding: 13px 22px; background: var(--green); color: #000; border: none; border-radius: 12px;
@@ -266,9 +266,9 @@
     background: var(--surface2); border: 1px solid var(--border); border-radius: 24px;
     padding: 36px 32px;
   }
-  .pricing-card.featured { border-color: rgba(90,255,126,0.25); background: var(--pricing-featured); }
+  .pricing-card.featured { border-color: rgba(0,230,118,0.25); background: var(--pricing-featured); }
   .pricing-badge {
-    display: inline-block; background: var(--green-dim); border: 1px solid rgba(90,255,126,0.25);
+    display: inline-block; background: var(--green-dim); border: 1px solid rgba(0,230,118,0.25);
     color: var(--green); font-size: 11px; font-family: var(--font-mono); letter-spacing: 0.08em;
     padding: 4px 12px; border-radius: 99px; margin-bottom: 20px;
   }
@@ -640,14 +640,14 @@ function applyTheme(theme) {
   var moon = document.getElementById('theme-icon-moon');
   if (sun && moon) { sun.style.display = theme === 'light' ? 'none' : ''; moon.style.display = theme === 'light' ? '' : 'none'; }
   var meta = document.querySelector('meta[name="theme-color"]');
-  if (meta) meta.setAttribute('content', theme === 'light' ? '#f9fafb' : '#0a0a0a');
+  if (meta) meta.setAttribute('content', theme === 'light' ? '#ffffff' : '#0a0a0a');
 }
 function toggleTheme() {
   var next = document.documentElement.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
   localStorage.setItem('moist_theme', next);
   applyTheme(next);
 }
-applyTheme(localStorage.getItem('moist_theme') || 'dark');
+applyTheme(localStorage.getItem('moist_theme') || 'light');
 </script>
 </body>
 </html>
