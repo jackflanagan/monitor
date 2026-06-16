@@ -1,17 +1,20 @@
 /**
  * weekly-digest — Supabase Edge Function
  *
- * Sends a weekly HTML email to every user with a 7-day summary of their plants:
- *   - Average moisture per plant
- *   - Number of dry alerts
- *   - Number of watering events
+ * Sends a personalised weekly push notification + HTML email to each user
+ * every Sunday at 9am UTC.
+ *
+ * For each device calculates over 7 days:
+ *   - Average moisture %, time in OK/DRY/WET ranges
+ *   - Number of dry alerts (transitions into DRY)
+ *   - Number of waterings from watering_log
  *
  * Deploy:  supabase functions deploy weekly-digest
  *
- * Schedule (run in Supabase SQL editor):
+ * Schedule (pg_cron — 9am every Sunday UTC):
  *   SELECT cron.schedule(
  *     'weekly-digest',
- *     '0 9 * * 1',   -- every Monday at 09:00 UTC
+ *     '0 9 * * 0',
  *     $$
  *       SELECT net.http_post(
  *         url      := 'https://<project-ref>.supabase.co/functions/v1/weekly-digest',
@@ -19,32 +22,57 @@
  *       )
  *     $$
  *   );
+ *
+ * Required secrets: SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, SMTP_FROM,
+ *                   VAPID_PRIVATE_KEY, VAPID_PUBLIC_KEY, VAPID_SUBJECT
  */
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
-const SUPABASE_URL        = Deno.env.get('SUPABASE_URL')!
+const SUPABASE_URL         = Deno.env.get('SUPABASE_URL')!
 const SUPABASE_SERVICE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
-const SMTP_FROM           = Deno.env.get('SMTP_FROM') ?? 'Moist <noreply@plantmoist.com>'
+const SMTP_FROM            = Deno.env.get('SMTP_FROM') ?? 'Moist <noreply@plantmoist.com>'
+const VAPID_PRIVATE_KEY    = Deno.env.get('VAPID_PRIVATE_KEY') ?? ''
+const VAPID_PUBLIC_KEY     = Deno.env.get('VAPID_PUBLIC_KEY')  ?? ''
+const VAPID_SUBJECT        = Deno.env.get('VAPID_SUBJECT')     ?? 'mailto:admin@plantmoist.com'
 
-interface Device {
-  device_id: string
-  plant_name: string
-  user_id: string
+async function sendWebPush(subscription: Record<string, unknown>, payload: string): Promise<boolean> {
+  if (!VAPID_PRIVATE_KEY || !VAPID_PUBLIC_KEY) return false
+  try {
+    const { webPush } = await import('https://esm.sh/web-push@3.6.7')
+    webPush.setVapidDetails(VAPID_SUBJECT, VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY)
+    await webPush.sendNotification(subscription as Parameters<typeof webPush.sendNotification>[0], payload)
+    return true
+  } catch (e) {
+    console.error('Push send failed:', e)
+    return false
+  }
 }
 
-interface UserRow {
-  id: string
-  email: string
+function buildPushMessage(plants: PlantStat[]): { title: string; body: string } {
+  if (!plants.length) return { title: 'Weekly plant update 🌿', body: 'No readings this week — check your sensor.' }
+  const worst = [...plants].sort((a, b) => (a.okPct ?? 100) - (b.okPct ?? 100))[0]
+  const best  = [...plants].sort((a, b) => (b.okPct ?? 0)  - (a.okPct ?? 0))[0]
+  if (plants.length === 1) {
+    const s = plants[0]
+    if ((s.okPct ?? 0) >= 90)  return { title: `${s.name} had a great week 🌿`, body: `Moisture OK ${s.okPct}% of the time — well done!` }
+    if ((s.dryPct ?? 0) >= 40) return { title: `${s.name} needs attention 🥀`,  body: `It was dry ${s.dryPct}% of the time this week.` }
+    return { title: `${s.name}'s weekly report 📊`, body: `Avg moisture ${s.avgMoisture}%. ${s.wateringCount} watering${s.wateringCount !== 1 ? 's' : ''} logged.` }
+  }
+  const allGood = plants.every((s) => (s.okPct ?? 0) >= 75)
+  if (allGood) return { title: 'All your plants had a great week 🌿', body: plants.map((s) => `${s.name}: OK ${s.okPct}%`).join(' · ') }
+  return { title: `${worst.name} needs attention this week 🥀`, body: `Dry ${worst.dryPct}% of the time. ${best.name} is thriving (OK ${best.okPct}%).` }
 }
 
-interface ReadingSummary {
-  avg_moisture: number
-  dry_count: number
-}
-
-interface WateringSummary {
-  watering_count: number
+interface PlantStat {
+  name:          string
+  avgMoisture:   number | null
+  okPct:         number | null
+  dryPct:        number | null
+  wetPct:        number | null
+  dryCount:      number
+  wateringCount: number
+  readingCount:  number
 }
 
 Deno.serve(async (_req: Request) => {
@@ -55,102 +83,75 @@ Deno.serve(async (_req: Request) => {
 
     const since = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
 
-    // Fetch all users via Auth admin API
     const { data: usersData, error: usersError } = await admin.auth.admin.listUsers()
     if (usersError) throw usersError
-    const users: UserRow[] = usersData.users.map((u) => ({ id: u.id, email: u.email ?? '' }))
 
-    let sent = 0
+    let pushSent = 0, emailSent = 0
 
-    for (const user of users) {
-      if (!user.email) continue
+    for (const u of usersData.users) {
+      if (!u.email) continue
 
-      // Fetch user's devices
       const { data: devices } = await admin
-        .from('devices')
-        .select('device_id, plant_name, user_id')
-        .eq('user_id', user.id)
+        .from('devices').select('device_id, plant_name').eq('user_id', u.id)
+      if (!devices?.length) continue
 
-      if (!devices || devices.length === 0) continue
-
-      // Build stats per device
-      const plantStats = await Promise.all(
-        devices.map(async (device: Device) => {
+      const plantStats: PlantStat[] = await Promise.all(
+        devices.map(async (device: { device_id: string; plant_name: string }) => {
           const [readingsRes, wateringsRes] = await Promise.all([
-            admin
-              .from('readings')
-              .select('moisture, status')
-              .eq('device_id', device.device_id)
-              .gte('created_at', since),
-            admin
-              .from('watering_log')
-              .select('id', { count: 'exact', head: true })
-              .eq('device_id', device.device_id)
-              .eq('user_id', user.id)
-              .gte('watered_at', since),
+            admin.from('readings').select('moisture, status').eq('device_id', device.device_id).gte('created_at', since),
+            admin.from('watering_log').select('id', { count: 'exact', head: true }).eq('device_id', device.device_id).eq('user_id', u.id).gte('watered_at', since),
           ])
-
           const readings = readingsRes.data ?? []
-          const avgMoisture =
-            readings.length > 0
-              ? Math.round(readings.reduce((s: number, r: any) => s + r.moisture, 0) / readings.length)
-              : null
-          const dryCount = readings.filter((r: any) => r.status === 'DRY').length
-          const wateringCount = wateringsRes.count ?? 0
-
+          const total    = readings.length
+          const okPct    = total ? Math.round(readings.filter((r: any) => r.status === 'OK').length  / total * 100) : null
+          const dryPct   = total ? Math.round(readings.filter((r: any) => r.status === 'DRY').length / total * 100) : null
+          const wetPct   = total ? Math.round(readings.filter((r: any) => r.status === 'WET').length / total * 100) : null
+          const dryCount = readings.reduce((n: number, r: any, i: number) =>
+            i > 0 && r.status === 'DRY' && readings[i - 1].status !== 'DRY' ? n + 1 : n, 0)
           return {
-            name: device.plant_name || device.device_id,
-            avgMoisture,
-            dryCount,
-            wateringCount,
-            readingCount: readings.length,
+            name:          device.plant_name || device.device_id,
+            avgMoisture:   total ? Math.round(readings.reduce((s: number, r: any) => s + r.moisture, 0) / total) : null,
+            okPct, dryPct, wetPct, dryCount,
+            wateringCount: wateringsRes.count ?? 0,
+            readingCount:  total,
           }
         })
       )
 
-      const html = buildEmailHtml(user.email, plantStats)
+      // ── Push notification ──────────────────────────────────────────────────
+      const { data: subs } = await admin.from('push_subscriptions').select('subscription').eq('user_id', u.id)
+      if (subs?.length) {
+        const { title, body } = buildPushMessage(plantStats)
+        const payload = JSON.stringify({ title, body, icon: '/icon-192.png', badge: '/badge-72.png' })
+        for (const row of subs) {
+          const ok = await sendWebPush(row.subscription, payload)
+          if (ok) pushSent++
+        }
+      }
 
-      // Send via Supabase SMTP (Resend integration)
+      // ── HTML email ─────────────────────────────────────────────────────────
+      const html = buildEmailHtml(u.email, plantStats)
       const emailRes = await fetch(`${SUPABASE_URL}/functions/v1/send-email`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${SUPABASE_SERVICE_KEY}`,
-        },
-        body: JSON.stringify({
-          from: SMTP_FROM,
-          to: user.email,
-          subject: '🌿 Your weekly Moist report',
-          html,
-        }),
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${SUPABASE_SERVICE_KEY}` },
+        body: JSON.stringify({ from: SMTP_FROM, to: u.email, subject: '🌿 Your weekly Moist report', html }),
       })
-
-      if (emailRes.ok) sent++
+      if (emailRes.ok) emailSent++
     }
 
-    return new Response(JSON.stringify({ ok: true, users: users.length, sent }), {
+    return new Response(JSON.stringify({ ok: true, users: usersData.users.length, pushSent, emailSent }), {
       headers: { 'Content-Type': 'application/json' },
     })
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : String(err)
     console.error('weekly-digest error:', message)
     return new Response(JSON.stringify({ ok: false, error: message }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' },
+      status: 500, headers: { 'Content-Type': 'application/json' },
     })
   }
 })
 
-function buildEmailHtml(
-  email: string,
-  plants: Array<{
-    name: string
-    avgMoisture: number | null
-    dryCount: number
-    wateringCount: number
-    readingCount: number
-  }>
-): string {
+function buildEmailHtml(email: string, plants: PlantStat[]): string {
   const rows = plants
     .map((p) => {
       const moisture = p.avgMoisture !== null ? `${p.avgMoisture}%` : 'No data'
