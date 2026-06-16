@@ -256,6 +256,35 @@
   /* Watering prediction card */
   .pred-card{margin:0 16px 12px;background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:18px 20px;display:none;align-items:center;gap:14px}
   .pred-card.show{display:flex}
+  /* Encyclopedia */
+  .encyc-screen{padding:56px 16px 40px}
+  .encyc-header{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+  .encyc-back{background:none;border:none;cursor:pointer;color:var(--text);padding:4px;display:flex;align-items:center;gap:6px;font-family:var(--font-head);font-size:15px;font-weight:700}
+  .encyc-title{font-size:22px;font-weight:900;letter-spacing:-0.03em;flex:1}
+  .encyc-search{width:100%;padding:12px 16px;border-radius:14px;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-family:var(--font-mono);font-size:14px;outline:none;margin-bottom:16px;box-sizing:border-box}
+  .encyc-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .encyc-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:14px;cursor:pointer;transition:border-color 0.2s}
+  .encyc-card:hover{border-color:var(--green)}
+  .encyc-card-icon{font-size:28px;margin-bottom:8px}
+  .encyc-card-name{font-size:13px;font-weight:700;margin-bottom:4px}
+  .encyc-card-range{font-size:11px;font-family:var(--font-mono);color:var(--muted)}
+  .encyc-card-badge{display:inline-block;font-size:10px;padding:2px 7px;border-radius:99px;margin-top:6px;font-family:var(--font-mono);font-weight:700}
+  .badge-easy{background:rgba(0,230,118,0.15);color:var(--green)}
+  .badge-medium{background:rgba(255,184,48,0.15);color:var(--amber)}
+  .badge-hard{background:rgba(255,64,129,0.15);color:#FF4081}
+  /* Detail */
+  .encyc-detail{display:none;padding:0 0 40px}
+  .encyc-detail.show{display:block}
+  .encyc-detail-hero{text-align:center;padding:40px 24px 24px}
+  .encyc-detail-icon{font-size:72px;margin-bottom:12px}
+  .encyc-detail-name{font-size:28px;font-weight:900;letter-spacing:-0.03em;margin-bottom:6px}
+  .encyc-detail-sci{font-size:13px;color:var(--muted);font-family:var(--font-mono);margin-bottom:12px}
+  .encyc-detail-rows{margin:0 16px;background:var(--surface);border:1px solid var(--border);border-radius:18px;overflow:hidden}
+  .encyc-detail-row{display:flex;justify-content:space-between;align-items:center;padding:14px 18px;border-bottom:1px solid var(--border);font-size:14px}
+  .encyc-detail-row:last-child{border-bottom:none}
+  .encyc-detail-label{color:var(--muted);font-family:var(--font-mono);font-size:12px}
+  .encyc-detail-val{font-weight:700}
+  .encyc-apply-btn{margin:20px 16px 0;width:calc(100% - 32px);padding:15px;background:var(--green);border:none;border-radius:16px;color:#000;font-family:var(--font-head);font-size:16px;font-weight:900;cursor:pointer;display:block}
   .pred-icon{font-size:28px;flex-shrink:0}
   .pred-headline{font-size:14px;font-weight:700;margin-bottom:3px}
   .pred-sub{font-size:12px;color:var(--muted);font-family:var(--font-mono)}
@@ -462,6 +491,9 @@
         </button>
         <button class="icon-btn" onclick="showScreen('add-device')" title="Add device">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        </button>
+        <button class="icon-btn" onclick="openEncyclopedia()" title="Plant encyclopedia">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
         </button>
         <button class="icon-btn" onclick="openSettings()" title="Settings">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
@@ -706,6 +738,41 @@
         <button class="onboard-next" id="onboard-next-btn" onclick="onboardNext()">Next</button>
       </div>
     </div>
+  </div>
+</div>
+
+<div id="screen-encyclopedia" class="screen">
+  <div class="encyc-screen" id="encyc-list-view">
+    <div class="encyc-header">
+      <button class="encyc-back" onclick="showScreen('dashboard')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px"><polyline points="15 18 9 12 15 6"/></svg>
+        Back
+      </button>
+      <div class="encyc-title">Encyclopedia</div>
+    </div>
+    <input class="encyc-search" id="encyc-search" placeholder="Search plants…" oninput="renderEncyclopedia(this.value)" type="search">
+    <div class="encyc-grid" id="encyc-grid"></div>
+  </div>
+  <div class="encyc-detail" id="encyc-detail">
+    <div style="display:flex;align-items:center;gap:10px;padding:56px 16px 0">
+      <button class="encyc-back" onclick="closeEncycDetail()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px"><polyline points="15 18 9 12 15 6"/></svg>
+        Back
+      </button>
+    </div>
+    <div class="encyc-detail-hero">
+      <div class="encyc-detail-icon" id="ed-icon"></div>
+      <div class="encyc-detail-name" id="ed-name"></div>
+      <div class="encyc-detail-sci" id="ed-sci"></div>
+      <span class="encyc-card-badge" id="ed-badge"></span>
+    </div>
+    <div class="encyc-detail-rows">
+      <div class="encyc-detail-row"><span class="encyc-detail-label">Ideal moisture</span><span class="encyc-detail-val" id="ed-moisture"></span></div>
+      <div class="encyc-detail-row"><span class="encyc-detail-label">Watering</span><span class="encyc-detail-val" id="ed-watering"></span></div>
+      <div class="encyc-detail-row"><span class="encyc-detail-label">Light</span><span class="encyc-detail-val" id="ed-light"></span></div>
+      <div class="encyc-detail-row"><span class="encyc-detail-label">Difficulty</span><span class="encyc-detail-val" id="ed-difficulty"></span></div>
+    </div>
+    <button class="encyc-apply-btn" onclick="applyEncyclopediaPlant()">Apply to my plant</button>
   </div>
 </div>
 
@@ -2018,6 +2085,116 @@ async function fetchWateringPrediction(){
   else{var d=Math.round(hoursLeft/24);text='approximately '+d+' day'+(d===1?'':'s');}
   headlineEl.textContent='Water needed in '+text;
   subEl.textContent='Drying at '+dropPerHour.toFixed(1)+'% per hour based on last 24h';
+}
+
+// ── Plant encyclopedia ─────────────────────────────────────────────────────────
+var ENCYCLOPEDIA=[
+  {name:'Monstera',sci:'Monstera deliciosa',icon:'🌿',min:40,max:70,water:'Every 1-2 weeks',light:'Bright indirect',difficulty:'Easy'},
+  {name:'Pothos',sci:'Epipremnum aureum',icon:'🍃',min:30,max:60,water:'Every 1-2 weeks',light:'Low to bright indirect',difficulty:'Easy'},
+  {name:'Snake Plant',sci:'Sansevieria trifasciata',icon:'🌵',min:20,max:50,water:'Every 2-6 weeks',light:'Low to bright indirect',difficulty:'Easy'},
+  {name:'Peace Lily',sci:'Spathiphyllum wallisii',icon:'🌸',min:50,max:75,water:'Every 1-2 weeks',light:'Low to medium indirect',difficulty:'Easy'},
+  {name:'Fiddle Leaf Fig',sci:'Ficus lyrata',icon:'🌳',min:40,max:65,water:'Every 1-2 weeks',light:'Bright indirect',difficulty:'Hard'},
+  {name:'Succulent',sci:'Various genera',icon:'🪴',min:10,max:40,water:'Every 2-4 weeks',light:'Bright direct',difficulty:'Easy'},
+  {name:'Cactus',sci:'Cactaceae family',icon:'🌵',min:5,max:30,water:'Every 3-6 weeks',light:'Full sun',difficulty:'Easy'},
+  {name:'Spider Plant',sci:'Chlorophytum comosum',icon:'🌿',min:35,max:65,water:'Every 1-2 weeks',light:'Indirect',difficulty:'Easy'},
+  {name:'Aloe Vera',sci:'Aloe barbadensis',icon:'🌵',min:15,max:40,water:'Every 3 weeks',light:'Bright direct',difficulty:'Easy'},
+  {name:'ZZ Plant',sci:'Zamioculcas zamiifolia',icon:'🍃',min:20,max:45,water:'Every 2-3 weeks',light:'Low to bright indirect',difficulty:'Easy'},
+  {name:'Rubber Plant',sci:'Ficus elastica',icon:'🌱',min:35,max:65,water:'Every 1-2 weeks',light:'Bright indirect',difficulty:'Medium'},
+  {name:'Bird of Paradise',sci:'Strelitzia reginae',icon:'🌺',min:40,max:70,water:'Every 1-2 weeks',light:'Full sun',difficulty:'Medium'},
+  {name:'Chinese Evergreen',sci:'Aglaonema',icon:'🍃',min:40,max:70,water:'Every 1-2 weeks',light:'Low to medium indirect',difficulty:'Easy'},
+  {name:'Dracaena',sci:'Dracaena marginata',icon:'🌴',min:30,max:60,water:'Every 2 weeks',light:'Indirect',difficulty:'Easy'},
+  {name:'Calathea',sci:'Calathea orbifolia',icon:'🌿',min:50,max:80,water:'Every week',light:'Medium indirect',difficulty:'Hard'},
+  {name:'Philodendron',sci:'Philodendron hederaceum',icon:'🍃',min:40,max:70,water:'Every 1-2 weeks',light:'Bright indirect',difficulty:'Easy'},
+  {name:'Orchid',sci:'Phalaenopsis',icon:'🌸',min:45,max:70,water:'Every 7-10 days',light:'Bright indirect',difficulty:'Medium'},
+  {name:'Fern',sci:'Nephrolepis exaltata',icon:'🌿',min:60,max:85,water:'Every 3-4 days',light:'Indirect',difficulty:'Medium'},
+  {name:'Palm',sci:'Dypsis lutescens',icon:'🌴',min:40,max:70,water:'Every 1-2 weeks',light:'Bright indirect',difficulty:'Medium'},
+  {name:'Jade Plant',sci:'Crassula ovata',icon:'🪴',min:15,max:40,water:'Every 2-3 weeks',light:'Full sun',difficulty:'Easy'},
+  {name:'String of Pearls',sci:'Senecio rowleyanus',icon:'🌱',min:10,max:35,water:'Every 2-3 weeks',light:'Bright direct',difficulty:'Hard'},
+  {name:'Hoya',sci:'Hoya carnosa',icon:'🌿',min:30,max:60,water:'Every 2 weeks',light:'Bright indirect',difficulty:'Easy'},
+  {name:'Alocasia',sci:'Alocasia amazonica',icon:'🌿',min:50,max:75,water:'Every week',light:'Bright indirect',difficulty:'Hard'},
+  {name:'Peperomia',sci:'Peperomia obtusifolia',icon:'🍃',min:30,max:60,water:'Every 1-2 weeks',light:'Medium indirect',difficulty:'Easy'},
+  {name:'Dieffenbachia',sci:'Dieffenbachia seguine',icon:'🌿',min:40,max:70,water:'Every 1-2 weeks',light:'Medium indirect',difficulty:'Easy'},
+  {name:'Tradescantia',sci:'Tradescantia zebrina',icon:'🌱',min:40,max:70,water:'Every week',light:'Bright indirect',difficulty:'Easy'},
+  {name:'Bromeliad',sci:'Guzmania lingulata',icon:'🌺',min:40,max:65,water:'Via central cup',light:'Bright indirect',difficulty:'Medium'},
+  {name:'Anthurium',sci:'Anthurium andraeanum',icon:'🌺',min:50,max:75,water:'Every week',light:'Bright indirect',difficulty:'Medium'},
+  {name:'Croton',sci:'Codiaeum variegatum',icon:'🍂',min:45,max:70,water:'Every week',light:'Full sun',difficulty:'Hard'},
+  {name:'Schefflera',sci:'Schefflera arboricola',icon:'🌳',min:35,max:65,water:'Every 1-2 weeks',light:'Bright indirect',difficulty:'Medium'},
+  {name:'Norfolk Island Pine',sci:'Araucaria heterophylla',icon:'🌲',min:40,max:65,water:'Every 1-2 weeks',light:'Bright indirect',difficulty:'Medium'},
+  {name:'Cast Iron Plant',sci:'Aspidistra elatior',icon:'🌿',min:25,max:55,water:'Every 2-3 weeks',light:'Low',difficulty:'Easy'},
+  {name:'Nerve Plant',sci:'Fittonia albivenis',icon:'🍃',min:60,max:85,water:'Every 3-4 days',light:'Low to medium indirect',difficulty:'Hard'},
+  {name:'Eucalyptus',sci:'Eucalyptus cinerea',icon:'🌿',min:35,max:60,water:'Every week',light:'Full sun',difficulty:'Medium'},
+  {name:'English Ivy',sci:'Hedera helix',icon:'🌿',min:40,max:65,water:'Every week',light:'Medium indirect',difficulty:'Medium'},
+  {name:'Ponytail Palm',sci:'Beaucarnea recurvata',icon:'🌴',min:10,max:35,water:'Every 3-4 weeks',light:'Full sun',difficulty:'Easy'},
+  {name:'String of Hearts',sci:'Ceropegia woodii',icon:'💚',min:15,max:40,water:'Every 2-3 weeks',light:'Bright indirect',difficulty:'Easy'},
+  {name:'Money Tree',sci:'Pachira aquatica',icon:'🌳',min:40,max:70,water:'Every 1-2 weeks',light:'Bright indirect',difficulty:'Easy'},
+  {name:'African Violet',sci:'Saintpaulia ionantha',icon:'🌸',min:50,max:75,water:'When soil is dry 1 inch down',light:'Bright indirect',difficulty:'Medium'},
+  {name:'Lucky Bamboo',sci:'Dracaena sanderiana',icon:'🎋',min:50,max:80,water:'Keep in water or moist',light:'Low to medium indirect',difficulty:'Easy'},
+  {name:'Boston Fern',sci:'Nephrolepis exaltata Bostoniensis',icon:'🌿',min:60,max:85,water:'Every 2-3 days',light:'Indirect',difficulty:'Medium'},
+  {name:'Dwarf Umbrella',sci:'Schefflera arboricola',icon:'☂️',min:35,max:65,water:'Every 1-2 weeks',light:'Bright indirect',difficulty:'Easy'},
+  {name:'Parlour Palm',sci:'Chamaedorea elegans',icon:'🌴',min:40,max:70,water:'Every 1-2 weeks',light:'Low to medium indirect',difficulty:'Easy'},
+  {name:'Yucca',sci:'Yucca elephantipes',icon:'🌵',min:15,max:40,water:'Every 2-3 weeks',light:'Full sun',difficulty:'Easy'},
+  {name:'Air Plant',sci:'Tillandsia',icon:'🌿',min:0,max:25,water:'Mist 2-3x per week',light:'Bright indirect',difficulty:'Easy'},
+  {name:'Wandering Jew',sci:'Tradescantia fluminensis',icon:'🌸',min:40,max:70,water:'Every week',light:'Bright indirect',difficulty:'Easy'},
+  {name:'Swiss Cheese Plant',sci:'Monstera adansonii',icon:'🌿',min:40,max:70,water:'Every 1-2 weeks',light:'Bright indirect',difficulty:'Easy'},
+  {name:'Begonia',sci:'Begonia rex',icon:'🌺',min:45,max:70,water:'Every week',light:'Medium indirect',difficulty:'Medium'},
+  {name:'Geranium',sci:'Pelargonium',icon:'🌸',min:35,max:65,water:'Every 5-7 days',light:'Full sun',difficulty:'Medium'},
+  {name:'Prayer Plant',sci:'Maranta leuconeura',icon:'🍃',min:55,max:80,water:'Every week',light:'Medium indirect',difficulty:'Medium'},
+];
+
+var _encDetailIdx=null;
+function openEncyclopedia(){
+  document.getElementById('encyc-list-view').style.display='block';
+  document.getElementById('encyc-detail').classList.remove('show');
+  document.getElementById('encyc-search').value='';
+  renderEncyclopedia('');
+  showScreen('encyclopedia');
+}
+function renderEncyclopedia(query){
+  var q=(query||'').toLowerCase();
+  var filtered=ENCYCLOPEDIA.filter(function(p){return p.name.toLowerCase().includes(q)||p.sci.toLowerCase().includes(q);});
+  document.getElementById('encyc-grid').innerHTML=filtered.map(function(p,i){
+    var idx=ENCYCLOPEDIA.indexOf(p);
+    var badgeCls=p.difficulty==='Easy'?'badge-easy':p.difficulty==='Medium'?'badge-medium':'badge-hard';
+    return '<div class="encyc-card" onclick="openEncycDetail('+idx+')">'
+      +'<div class="encyc-card-icon">'+p.icon+'</div>'
+      +'<div class="encyc-card-name">'+p.name+'</div>'
+      +'<div class="encyc-card-range">'+p.min+'–'+p.max+'% moisture</div>'
+      +'<span class="encyc-card-badge '+badgeCls+'">'+p.difficulty+'</span>'
+      +'</div>';
+  }).join('')||'<div style="grid-column:span 2;text-align:center;color:var(--muted);font-family:var(--font-mono);padding:24px">No plants found</div>';
+}
+function openEncycDetail(idx){
+  _encDetailIdx=idx;
+  var p=ENCYCLOPEDIA[idx];
+  var badgeCls=p.difficulty==='Easy'?'badge-easy':p.difficulty==='Medium'?'badge-medium':'badge-hard';
+  document.getElementById('ed-icon').textContent=p.icon;
+  document.getElementById('ed-name').textContent=p.name;
+  document.getElementById('ed-sci').textContent=p.sci;
+  document.getElementById('ed-badge').textContent=p.difficulty;
+  document.getElementById('ed-badge').className='encyc-card-badge '+badgeCls;
+  document.getElementById('ed-moisture').textContent=p.min+'% – '+p.max+'%';
+  document.getElementById('ed-watering').textContent=p.water;
+  document.getElementById('ed-light').textContent=p.light;
+  document.getElementById('ed-difficulty').textContent=p.difficulty;
+  document.getElementById('encyc-list-view').style.display='none';
+  document.getElementById('encyc-detail').classList.add('show');
+}
+function closeEncycDetail(){
+  document.getElementById('encyc-detail').classList.remove('show');
+  document.getElementById('encyc-list-view').style.display='block';
+}
+async function applyEncyclopediaPlant(){
+  if(_encDetailIdx===null||!activeDeviceId)return;
+  var p=ENCYCLOPEDIA[_encDetailIdx];
+  var {error}=await sb.from('devices').update({
+    dry_threshold:p.min,
+    wet_threshold:p.max
+  }).eq('device_id',activeDeviceId).eq('user_id',currentUser.id);
+  if(error){showToast('Could not apply: '+error.message);return;}
+  var device=userDevices.find(function(d){return d.device_id===activeDeviceId;});
+  if(device){device.dry_threshold=p.min;device.wet_threshold=p.max;}
+  showToast(p.name+' settings applied!',true);
+  showScreen('dashboard');
 }
 
 init();
