@@ -169,19 +169,39 @@
   .setup-link{color:var(--green);text-decoration:underline;cursor:pointer;font-family:var(--font-mono)}
 
   /* Onboarding */
-  .onboard-wrap{min-height:100vh;display:flex;flex-direction:column;padding:52px 28px 40px}
-  .onboard-skip{background:none;border:none;color:var(--muted);font-family:var(--font-head);font-size:14px;cursor:pointer;padding:0;align-self:flex-end;margin-bottom:32px}
-  .onboard-slides-outer{overflow:hidden;flex:1;display:flex;flex-direction:column}
-  .onboard-slides{display:flex;transition:transform 0.4s cubic-bezier(0.4,0,0.2,1);will-change:transform;flex:1}
-  .onboard-slide{min-width:100%;display:flex;flex-direction:column;justify-content:center;padding-right:16px}
+  .onboard-wrap{min-height:100vh;display:flex;flex-direction:column;overflow:hidden}
+  .onboard-topbar{display:flex;justify-content:flex-end;padding:56px 28px 0;flex-shrink:0}
+  .onboard-skip{background:none;border:none;color:var(--muted);font-family:var(--font-head);font-size:14px;cursor:pointer;padding:4px 0}
+  .onboard-slides-outer{overflow:hidden;flex:1;display:flex;flex-direction:column;min-height:0}
+  .onboard-slides{display:flex;transition:transform 0.42s cubic-bezier(0.4,0,0.2,1);will-change:transform;flex:1;align-items:stretch}
+  .onboard-slide{min-width:100%;display:flex;flex-direction:column;justify-content:center;padding:0 32px}
+  .onboard-plant-wrap{display:flex;justify-content:center;margin-bottom:28px}
+  .onboard-logo-big{font-family:var(--font-head);font-size:38px;font-weight:900;letter-spacing:-0.04em;margin-bottom:6px}
+  .onboard-logo-big span{color:var(--green)}
+  .onboard-tagline-big{font-size:22px;font-weight:800;letter-spacing:-0.02em;margin-bottom:12px}
   .onboard-icon{font-size:56px;margin-bottom:24px}
-  .onboard-title{font-size:26px;font-weight:800;letter-spacing:-0.03em;margin-bottom:12px}
-  .onboard-body{font-size:15px;color:var(--muted);line-height:1.65}
-  .onboard-dots{display:flex;gap:6px;margin-top:36px}
+  .onboard-title{font-size:24px;font-weight:800;letter-spacing:-0.03em;margin-bottom:12px}
+  .onboard-body{font-size:15px;color:var(--muted);line-height:1.65;margin-bottom:0}
+  .onboard-steps{display:flex;flex-direction:column;gap:18px;margin-top:4px}
+  .onboard-step{display:flex;align-items:flex-start;gap:16px}
+  .onboard-step-icon{width:44px;height:44px;border-radius:14px;background:var(--surface2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+  .onboard-step-title{font-size:14px;font-weight:700;margin-bottom:2px}
+  .onboard-step-body{font-size:13px;color:var(--muted);font-family:var(--font-mono);line-height:1.5}
+  .onboard-notif-mock{background:var(--surface2);border:1px solid var(--border);border-radius:18px;padding:14px 16px;margin-top:24px;max-width:340px;width:100%}
+  .onboard-notif-app{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+  .onboard-notif-appicon{width:22px;height:22px;border-radius:6px;background:var(--green);display:flex;align-items:center;justify-content:center;font-size:12px}
+  .onboard-notif-appname{font-size:12px;font-weight:700;font-family:var(--font-mono);flex:1}
+  .onboard-notif-time{font-size:11px;color:var(--muted);font-family:var(--font-mono)}
+  .onboard-notif-title{font-size:14px;font-weight:700;margin-bottom:3px}
+  .onboard-notif-body{font-size:13px;color:var(--muted);font-family:var(--font-mono)}
+  .onboard-cta{display:block;width:100%;padding:16px;background:var(--green);border:none;border-radius:16px;color:#000;font-family:var(--font-head);font-size:17px;font-weight:900;cursor:pointer;margin-top:32px;transition:opacity 0.2s;letter-spacing:-0.01em}
+  .onboard-cta:hover{opacity:0.9}
+  .onboard-footer{padding:0 28px 44px;flex-shrink:0}
+  .onboard-dots{display:flex;gap:6px;margin-bottom:20px}
   .onboard-dot{width:6px;height:6px;border-radius:50%;background:var(--border);transition:all 0.3s}
   .onboard-dot.active{background:var(--green2);width:18px;border-radius:3px}
-  .onboard-nav{display:flex;justify-content:flex-end;margin-top:20px}
-  .onboard-next{background:var(--green);color:#000;border:none;border-radius:14px;padding:14px 28px;font-family:var(--font-head);font-size:15px;font-weight:800;cursor:pointer;transition:opacity 0.2s}
+  .onboard-nav{display:flex;justify-content:flex-end}
+  .onboard-next{background:var(--green);color:#000;border:none;border-radius:14px;padding:13px 28px;font-family:var(--font-head);font-size:15px;font-weight:800;cursor:pointer;transition:opacity 0.2s}
   .onboard-next:hover{opacity:0.9}
 
   /* Calibration */
@@ -559,30 +579,110 @@
 
 <div id="screen-onboarding" class="screen">
   <div class="onboard-wrap">
-    <button class="onboard-skip" onclick="completeOnboarding()">Skip</button>
+    <div class="onboard-topbar">
+      <button class="onboard-skip" onclick="skipOnboarding()">Skip</button>
+    </div>
     <div class="onboard-slides-outer">
       <div class="onboard-slides" id="onboard-slides">
+
+        <!-- Slide 1: Welcome -->
         <div class="onboard-slide">
-          <div class="onboard-icon">🌿</div>
-          <div class="onboard-title">Welcome to Moist</div>
-          <div class="onboard-body">Monitor your plants' soil moisture from anywhere, in real time.</div>
+          <div class="onboard-plant-wrap">
+            <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" style="width:170px;height:170px">
+              <!-- Pot -->
+              <path d="M64 156 L74 196 L126 196 L136 156 Z" fill="#C06030"/>
+              <rect x="58" y="144" width="84" height="14" rx="7" fill="#D4784A"/>
+              <!-- Soil -->
+              <ellipse cx="100" cy="146" rx="36" ry="7" fill="#5C3A1E"/>
+              <!-- Stem -->
+              <line x1="100" y1="146" x2="100" y2="104" stroke="#2E7D32" stroke-width="5" stroke-linecap="round"/>
+              <path d="M100 130 Q88 122 78 118" stroke="#2E7D32" stroke-width="4" stroke-linecap="round" fill="none"/>
+              <path d="M100 130 Q112 122 122 118" stroke="#2E7D32" stroke-width="4" stroke-linecap="round" fill="none"/>
+              <!-- Left leaf -->
+              <ellipse cx="68" cy="112" rx="26" ry="13" fill="#00E676" transform="rotate(-35 68 112)"/>
+              <!-- Right leaf -->
+              <ellipse cx="132" cy="112" rx="26" ry="13" fill="#00C853" transform="rotate(35 132 112)"/>
+              <!-- Top leaf with face -->
+              <ellipse cx="100" cy="84" rx="22" ry="28" fill="#00E676"/>
+              <!-- Eye whites -->
+              <circle cx="92" cy="76" r="6" fill="white" opacity="0.95"/>
+              <circle cx="108" cy="76" r="6" fill="white" opacity="0.95"/>
+              <!-- Pupils -->
+              <circle cx="93" cy="77" r="3.5" fill="#1a1a1a"/>
+              <circle cx="109" cy="77" r="3.5" fill="#1a1a1a"/>
+              <!-- Shine -->
+              <circle cx="95" cy="75" r="1.5" fill="white"/>
+              <circle cx="111" cy="75" r="1.5" fill="white"/>
+              <!-- Smile -->
+              <path d="M90 88 Q100 96 110 88" stroke="white" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+              <!-- Sparkles -->
+              <circle cx="40" cy="64" r="3" fill="#FFD700" opacity="0.85"/>
+              <circle cx="46" cy="56" r="2" fill="#FFD700" opacity="0.6"/>
+              <circle cx="34" cy="57" r="1.5" fill="#FFD700" opacity="0.6"/>
+              <circle cx="158" cy="58" r="3" fill="#FF4081" opacity="0.75"/>
+              <circle cx="166" cy="51" r="2" fill="#FF4081" opacity="0.5"/>
+              <circle cx="153" cy="51" r="1.5" fill="#FF4081" opacity="0.5"/>
+            </svg>
+          </div>
+          <div class="onboard-logo-big">Moi<span>st</span></div>
+          <div class="onboard-tagline-big">Never kill a plant again</div>
+          <div class="onboard-body">Real-time soil moisture monitoring, right on your phone.</div>
         </div>
+
+        <!-- Slide 2: How it works -->
         <div class="onboard-slide">
-          <div class="onboard-icon">📡</div>
           <div class="onboard-title">How it works</div>
-          <div class="onboard-body">Your ESP32 reads soil moisture every 10 seconds and sends it to the cloud. You get instant updates, anywhere.</div>
+          <div class="onboard-steps">
+            <div class="onboard-step">
+              <div class="onboard-step-icon">🐸</div>
+              <div>
+                <div class="onboard-step-title">Plug in your frog sensor</div>
+                <div class="onboard-step-body">Push the sensor into your plant's soil and connect it to power.</div>
+              </div>
+            </div>
+            <div class="onboard-step">
+              <div class="onboard-step-icon">📶</div>
+              <div>
+                <div class="onboard-step-title">Connect to WiFi</div>
+                <div class="onboard-step-body">Join the Moist Setup hotspot, enter your home WiFi — takes 2 minutes.</div>
+              </div>
+            </div>
+            <div class="onboard-step">
+              <div class="onboard-step-icon">📱</div>
+              <div>
+                <div class="onboard-step-title">Monitor from anywhere</div>
+                <div class="onboard-step-body">Check live moisture readings any time, anywhere in the world.</div>
+              </div>
+            </div>
+          </div>
         </div>
+
+        <!-- Slide 3: Notifications -->
         <div class="onboard-slide">
-          <div class="onboard-icon">🔌</div>
-          <div class="onboard-title">Device setup</div>
-          <div class="onboard-body">Plug in your ESP32, join the Moist Setup hotspot, and enter your home WiFi. Takes about 2 minutes.</div>
+          <div class="onboard-title">You'll get notified</div>
+          <div class="onboard-body">We alert you before it's too late — so you never come home to a sad, droopy plant.</div>
+          <div class="onboard-notif-mock">
+            <div class="onboard-notif-app">
+              <div class="onboard-notif-appicon">🐸</div>
+              <div class="onboard-notif-appname">Moist</div>
+              <div class="onboard-notif-time">now</div>
+            </div>
+            <div class="onboard-notif-title">Your monstera is thirsty 🥀</div>
+            <div class="onboard-notif-body">Moisture at 18% — time to water 💧</div>
+          </div>
         </div>
+
+        <!-- Slide 4: CTA -->
         <div class="onboard-slide">
-          <div class="onboard-icon">✅</div>
-          <div class="onboard-title">You're all set!</div>
-          <div class="onboard-body">Check your email to confirm your account, then sign in and add your first device.</div>
+          <div class="onboard-icon">🌱</div>
+          <div class="onboard-title">Ready to set up your sensor?</div>
+          <div class="onboard-body">Let's add your first plant and get Moist running.</div>
+          <button class="onboard-cta" onclick="completeOnboarding()">Add my first plant</button>
         </div>
+
       </div>
+    </div>
+    <div class="onboard-footer">
       <div class="onboard-dots" id="onboard-dots">
         <div class="onboard-dot active"></div>
         <div class="onboard-dot"></div>
@@ -768,7 +868,9 @@ async function doLogin(){
   var {data,error}=await sb.auth.signInWithPassword({email,password});
   btn.disabled=false;btn.textContent='Sign in';
   if(error){showAuthError('login-error',error.message);return;}
-  currentUser=data.user;await loadDashboard();
+  currentUser=data.user;
+  if(!localStorage.getItem('moist_onboarded')){showOnboarding();}
+  else{await loadDashboard();}
 }
 
 async function doSignup(){
@@ -1338,13 +1440,29 @@ function showOnboarding(){
   onboardSlide=0;
   updateOnboardSlide();
   showScreen('onboarding');
+  // Swipe support
+  var outer=document.getElementById('onboard-slides');
+  var startX=0,startY=0;
+  outer.addEventListener('touchstart',function(e){startX=e.touches[0].clientX;startY=e.touches[0].clientY;},{passive:true,once:false});
+  outer._swipeHandler=function(e){
+    var dx=e.changedTouches[0].clientX-startX;
+    var dy=e.changedTouches[0].clientY-startY;
+    if(Math.abs(dx)<40||Math.abs(dy)>Math.abs(dx))return;
+    if(dx<0&&onboardSlide<3){onboardSlide++;updateOnboardSlide();}
+    else if(dx>0&&onboardSlide>0){onboardSlide--;updateOnboardSlide();}
+  };
+  outer.removeEventListener('touchend',outer._swipeHandler);
+  outer.addEventListener('touchend',outer._swipeHandler,{passive:true});
 }
 function updateOnboardSlide(){
   document.getElementById('onboard-slides').style.transform='translateX(-'+onboardSlide+'00%)';
   document.querySelectorAll('.onboard-dot').forEach(function(d,i){
     d.className='onboard-dot'+(i===onboardSlide?' active':'');
   });
-  document.getElementById('onboard-next-btn').textContent=onboardSlide===3?'Get started':'Next';
+  var btn=document.getElementById('onboard-next-btn');
+  // Hide Next on last slide — the in-slide CTA button handles it
+  btn.style.display=onboardSlide===3?'none':'block';
+  if(onboardSlide<3)btn.textContent='Next';
 }
 function onboardNext(){
   if(onboardSlide<3){onboardSlide++;updateOnboardSlide();return;}
@@ -1352,8 +1470,13 @@ function onboardNext(){
 }
 function completeOnboarding(){
   localStorage.setItem('moist_onboarded','1');
-  showToast('Check your email to confirm your account!',true);
-  showScreen('login');
+  if(currentUser){showScreen('add-device');}
+  else{showToast('Check your email to confirm your account!',true);showScreen('login');}
+}
+function skipOnboarding(){
+  localStorage.setItem('moist_onboarded','1');
+  if(currentUser){loadDashboard();}
+  else{showScreen('login');}
 }
 
 // ── Calibration ───────────────────────────────────────────────────────────────
