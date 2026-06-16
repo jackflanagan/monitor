@@ -13,7 +13,7 @@ function urlBase64ToUint8Array(base64String) {
 function moistureLabel(m) {
   if (m < 15) return 'Bone dry';
   if (m < 30) return 'Thirsty';
-  if (m < 45) return 'Getting there';
+  if (m < 45) return 'Needs water';
   if (m < 65) return 'Happy';
   if (m < 80) return 'Lush';
   return 'Soaked';

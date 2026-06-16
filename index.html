@@ -1191,7 +1191,7 @@ function updateGauge(moisture,raw,status){
   var moistureLabel=(function(m){
     if(m<15)return'Bone dry';
     if(m<30)return'Thirsty';
-    if(m<45)return'Getting\nthere';
+    if(m<45)return'Needs\nwater';
     if(m<65)return'Happy';
     if(m<80)return'Lush';
     return'Soaked';

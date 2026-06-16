@@ -20,9 +20,10 @@ describe('moistureLabel', () => {
     expect(moistureLabel(29)).toBe('Thirsty');
   });
 
-  test('Getting there 30–44', () => {
-    expect(moistureLabel(30)).toBe('Getting there');
-    expect(moistureLabel(44)).toBe('Getting there');
+  test('Needs water 30–44', () => {
+    expect(moistureLabel(30)).toBe('Needs water');
+    expect(moistureLabel(44)).toBe('Needs water');
+
   });
 
   test('Happy 45–64', () => {
