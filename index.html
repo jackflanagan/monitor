@@ -881,6 +881,20 @@
         </label>
       </div>
     </div>
+    <div class="calibrate-section" style="margin-top:12px">
+      <div class="calibrate-label">Device info</div>
+      <div style="font-family:var(--font-mono);font-size:13px;line-height:2.2;color:var(--muted)">
+        <div style="display:flex;justify-content:space-between">Firmware<span id="di-firmware" style="color:var(--text)">— <span id="di-update-badge" style="display:none;background:rgba(255,184,48,0.15);color:var(--amber);border-radius:99px;padding:1px 7px;font-size:10px">update available</span></span></div>
+        <div style="display:flex;justify-content:space-between">Last seen<span id="di-lastseen" style="color:var(--text)">—</span></div>
+        <div style="display:flex;justify-content:space-between">Signal<span id="di-signal-label" style="color:var(--text)">— <span id="di-signal-dbm" style="color:var(--muted);font-size:11px"></span></span></div>
+        <div id="di-signal-tip" style="display:none;color:var(--amber);font-size:12px;line-height:1.5">Weak signal — move the sensor closer to your router or add a WiFi extender.</div>
+      </div>
+    </div>
+    <div class="calibrate-section" style="margin-top:12px">
+      <div class="calibrate-label">WiFi</div>
+      <div style="font-size:13px;color:var(--muted);font-family:var(--font-mono);margin-bottom:14px;line-height:1.6">This will disconnect your sensor from WiFi. You will need to reconnect it using the Moist Setup hotspot.</div>
+      <button class="calibrate-btn" onclick="confirmWifiReset()" style="color:#FF4081;border-color:rgba(255,64,129,0.3)">⚠️ Reset WiFi credentials</button>
+    </div>
     <button class="btn-primary" onclick="saveSettings()" style="margin-top:20px">Save settings</button>
   </div>
 </div>
@@ -1556,7 +1570,39 @@ function openSettings(){
   document.getElementById('notif-quiet-start').value=(ns.quiet_hours&&ns.quiet_hours.start)||'22:00';
   document.getElementById('notif-quiet-end').value=(ns.quiet_hours&&ns.quiet_hours.end)||'08:00';
   document.getElementById('notif-sound').checked=ns.sound!==false;
+  // Load device info (firmware, signal, last seen) from latest reading
+  loadDeviceInfo();
   showScreen('settings');
+}
+async function loadDeviceInfo(){
+  if(!activeDeviceId)return;
+  var [{data:readings},{data:config}]=await Promise.all([
+    sb.from('readings').select('firmware_version,rssi,created_at').eq('device_id',activeDeviceId).order('created_at',{ascending:false}).limit(1),
+    sb.from('app_config').select('value').eq('key','latest_firmware_version').single()
+  ]);
+  var r=readings&&readings[0];
+  if(!r)return;
+  // Firmware
+  var fw=r.firmware_version||'unknown';
+  document.getElementById('di-firmware').firstChild.textContent=fw+' ';
+  var latestFw=config&&config.value;
+  var badge=document.getElementById('di-update-badge');
+  if(badge)badge.style.display=(latestFw&&latestFw!==fw)?'inline':'none';
+  // Last seen
+  var t=new Date(r.created_at);
+  document.getElementById('di-lastseen').textContent=t.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})+' · '+t.toLocaleDateString([],{day:'numeric',month:'short'});
+  // Signal
+  var rssi=r.rssi;
+  var sigLabel,sigDbm='',sigTip=false;
+  if(rssi==null){sigLabel='—';}
+  else if(rssi>=-50){sigLabel='Excellent';}
+  else if(rssi>=-60){sigLabel='Good';}
+  else if(rssi>=-70){sigLabel='Fair';}
+  else{sigLabel='Weak';sigTip=true;}
+  if(rssi!=null)sigDbm='('+rssi+' dBm)';
+  document.getElementById('di-signal-label').firstChild.textContent=sigLabel+' ';
+  document.getElementById('di-signal-dbm').textContent=sigDbm;
+  document.getElementById('di-signal-tip').style.display=sigTip?'block':'none';
 }
 async function saveSettings(){
   var retentionDays=parseInt(document.getElementById('retention-select').value,10);
@@ -1580,6 +1626,27 @@ async function saveSettings(){
   if(device){device.retention_days=retentionDays;device.notification_settings=notifSettings;}
   showToast('Settings saved!',true);
   showScreen('dashboard');
+}
+
+// ── WiFi Reset ────────────────────────────────────────────────────────────────
+async function confirmWifiReset(){
+  if(!confirm('Reset WiFi credentials?\n\nThis will disconnect your sensor. You will need to reconnect it using the Moist Setup hotspot.'))return;
+  var btn=document.querySelector('[onclick="confirmWifiReset()"]');
+  if(btn){btn.disabled=true;btn.textContent='Sending command…';}
+  var {data:{session}}=await sb.auth.getSession();
+  var token=session&&session.access_token;
+  if(!token){showToast('Not signed in');return;}
+  try{
+    var res=await fetch(SUPABASE_URL+'/functions/v1/reset-device',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},
+      body:JSON.stringify({device_id:activeDeviceId})
+    });
+    var json=await res.json();
+    if(!res.ok)throw new Error(json.error||res.status);
+    showToast('Reset command sent — sensor will restart shortly',true);
+  }catch(e){showToast('Failed: '+e.message);}
+  if(btn){btn.disabled=false;btn.textContent='⚠️ Reset WiFi credentials';}
 }
 
 // ── WiFi Setup ────────────────────────────────────────────────────────────────

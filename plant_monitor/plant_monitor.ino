@@ -12,10 +12,12 @@
  * Board: ESP32 Dev Module
  */
 
+// ─── Firmware version ─────────────────────────────────────────────────────────
+#define FIRMWARE_VERSION "1.1.0"
+
 // ─── Configuration ────────────────────────────────────────────────────────────
 
 // Set to true to enable deep sleep (battery mode).
-// Set to false for continuous readings every READING_INTERVAL_MS.
 #define BATTERY_MODE false
 
 // Supabase project settings — replace with your own
@@ -28,25 +30,25 @@
 // ADC pin connected to moisture sensor (GPIO 34 on most ESP32 boards)
 #define MOISTURE_PIN   34
 
-// Thresholds (ADC counts, 0–4095)
-// Higher ADC = drier soil (capacitive sensors)
-#define DRY_THRESHOLD  2800   // Above this → DRY
-#define WET_THRESHOLD  1200   // Below this → WET
+// Thresholds (ADC counts, 0–4095). Higher ADC = drier (capacitive sensors)
+#define DRY_THRESHOLD  2800
+#define WET_THRESHOLD  1200
 
 // Continuous mode: reading interval in milliseconds
 #define READING_INTERVAL_MS 10000
 
+// How often to poll for pending commands (milliseconds, continuous mode only)
+#define COMMAND_POLL_INTERVAL_MS 60000
+
 // Battery mode: deep sleep duration in seconds (10 minutes)
 #define SLEEP_SECONDS  600
 
-// WiFiManager AP credentials (shown when no WiFi is saved)
+// WiFiManager AP credentials shown when no WiFi is saved
 #define AP_SSID        "Moist Setup"
 #define AP_PASSWORD    "moistplant"
 
 // ─── RTC memory (survives deep sleep) ────────────────────────────────────────
 
-// We store the WiFi credentials in RTC memory so the device can reconnect
-// after wake-up without launching the captive portal again.
 RTC_DATA_ATTR char rtc_ssid[64]     = {0};
 RTC_DATA_ATTR char rtc_password[64] = {0};
 RTC_DATA_ATTR int  boot_count       = 0;
@@ -62,6 +64,7 @@ RTC_DATA_ATTR int  boot_count       = 0;
 // ─── Globals ──────────────────────────────────────────────────────────────────
 
 WiFiManager wifiManager;
+unsigned long lastCommandCheckMs = 0;
 
 // ─── Setup ────────────────────────────────────────────────────────────────────
 
@@ -71,20 +74,16 @@ void setup() {
 
   boot_count++;
 
-  // Print wake reason in battery mode
-  if (BATTERY_MODE) {
-    printWakeReason();
-  }
+  if (BATTERY_MODE) printWakeReason();
 
-  Serial.printf("\n[Moist] Boot #%d  Device: %s\n", boot_count, DEVICE_ID);
+  Serial.printf("\n[Moist] Boot #%d  Device: %s  FW: %s\n", boot_count, DEVICE_ID, FIRMWARE_VERSION);
 
   // ── WiFi Connection ──────────────────────────────────────────────────────────
 
   bool usedSavedCreds = false;
 
   if (BATTERY_MODE && boot_count > 1 && strlen(rtc_ssid) > 0) {
-    // After first boot, use credentials saved in RTC memory for fast reconnect
-    Serial.printf("[WiFi] Reconnecting to saved SSID: %s\n", rtc_ssid);
+    Serial.printf("[WiFi] Reconnecting to: %s\n", rtc_ssid);
     WiFi.begin(rtc_ssid, rtc_password);
 
     unsigned long start = millis();
@@ -102,8 +101,7 @@ void setup() {
   }
 
   if (!usedSavedCreds) {
-    // First boot or reconnect failed: use WiFiManager captive portal
-    wifiManager.setConfigPortalTimeout(180); // 3 minutes to configure
+    wifiManager.setConfigPortalTimeout(180);
     wifiManager.setAPStaticIPConfig(IPAddress(192,168,4,1), IPAddress(192,168,4,1), IPAddress(255,255,255,0));
 
     if (!wifiManager.autoConnect(AP_SSID, AP_PASSWORD)) {
@@ -115,7 +113,6 @@ void setup() {
                   WiFi.localIP().toString().c_str(),
                   WiFi.SSID().c_str());
 
-    // Save credentials to RTC memory for fast reconnects after sleep
     WiFi.SSID().toCharArray(rtc_ssid, sizeof(rtc_ssid));
     WiFi.psk().toCharArray(rtc_password, sizeof(rtc_password));
   }
@@ -124,35 +121,35 @@ void setup() {
 
   int rawAdc    = readMoisture();
   int moisture  = adcToPercent(rawAdc);
+  int rssi      = WiFi.RSSI();
   String status = getStatus(rawAdc);
 
-  Serial.printf("[Sensor] Raw ADC: %d  Moisture: %d%%  Status: %s\n", rawAdc, moisture, status.c_str());
+  Serial.printf("[Sensor] Raw ADC: %d  Moisture: %d%%  Status: %s  RSSI: %d dBm\n",
+                rawAdc, moisture, status.c_str(), rssi);
 
-  bool posted = postReading(rawAdc, moisture, status);
+  bool posted = postReading(rawAdc, moisture, status, rssi);
   Serial.printf("[Supabase] Post %s\n", posted ? "OK" : "FAILED");
+
+  // In battery mode check commands once per wake before sleeping
+  if (BATTERY_MODE) checkCommands();
 
   // ── Sleep or wait ────────────────────────────────────────────────────────────
 
   if (BATTERY_MODE) {
     WiFi.disconnect(true);
     WiFi.mode(WIFI_OFF);
-    Serial.printf("[Sleep] Entering deep sleep for %d seconds (%d min)\n",
-                  SLEEP_SECONDS, SLEEP_SECONDS / 60);
+    Serial.printf("[Sleep] Deep sleep for %d seconds\n", SLEEP_SECONDS);
     Serial.flush();
     esp_sleep_enable_timer_wakeup((uint64_t)SLEEP_SECONDS * 1000000ULL);
     esp_deep_sleep_start();
-    // Code after this line never executes in battery mode
   }
-
-  // Continuous mode: loop() handles the timing
 }
 
 // ─── Loop (continuous mode only) ──────────────────────────────────────────────
 
 void loop() {
-  if (BATTERY_MODE) return; // Should never reach here in battery mode
+  if (BATTERY_MODE) return;
 
-  // Reconnect WiFi if dropped
   if (WiFi.status() != WL_CONNECTED) {
     Serial.println("[WiFi] Lost connection, reconnecting...");
     WiFi.reconnect();
@@ -160,14 +157,22 @@ void loop() {
     return;
   }
 
-  int rawAdc   = readMoisture();
-  int moisture = adcToPercent(rawAdc);
+  int rawAdc    = readMoisture();
+  int moisture  = adcToPercent(rawAdc);
+  int rssi      = WiFi.RSSI();
   String status = getStatus(rawAdc);
 
-  Serial.printf("[Sensor] Raw ADC: %d  Moisture: %d%%  Status: %s\n", rawAdc, moisture, status.c_str());
+  Serial.printf("[Sensor] Raw ADC: %d  Moisture: %d%%  Status: %s  RSSI: %d dBm\n",
+                rawAdc, moisture, status.c_str(), rssi);
 
-  bool posted = postReading(rawAdc, moisture, status);
+  bool posted = postReading(rawAdc, moisture, status, rssi);
   Serial.printf("[Supabase] Post %s\n", posted ? "OK" : "FAILED");
+
+  // Poll for pending commands every COMMAND_POLL_INTERVAL_MS
+  if (millis() - lastCommandCheckMs >= COMMAND_POLL_INTERVAL_MS) {
+    lastCommandCheckMs = millis();
+    checkCommands();
+  }
 
   delay(READING_INTERVAL_MS);
 }
@@ -175,7 +180,6 @@ void loop() {
 // ─── Sensor helpers ───────────────────────────────────────────────────────────
 
 int readMoisture() {
-  // Average 16 samples to reduce noise
   long sum = 0;
   for (int i = 0; i < 16; i++) {
     sum += analogRead(MOISTURE_PIN);
@@ -185,8 +189,6 @@ int readMoisture() {
 }
 
 int adcToPercent(int raw) {
-  // Capacitive sensors: high ADC = dry, low ADC = wet
-  // Clamp and invert
   int clamped = constrain(raw, WET_THRESHOLD, DRY_THRESHOLD);
   return map(clamped, DRY_THRESHOLD, WET_THRESHOLD, 0, 100);
 }
@@ -199,7 +201,7 @@ String getStatus(int raw) {
 
 // ─── Supabase POST ────────────────────────────────────────────────────────────
 
-bool postReading(int rawAdc, int moisture, String status) {
+bool postReading(int rawAdc, int moisture, String status, int rssi) {
   if (WiFi.status() != WL_CONNECTED) return false;
 
   HTTPClient http;
@@ -210,18 +212,90 @@ bool postReading(int rawAdc, int moisture, String status) {
   http.addHeader("Prefer", "return=minimal");
 
   StaticJsonDocument<256> doc;
-  doc["device_id"] = DEVICE_ID;
-  doc["raw_adc"]   = rawAdc;
-  doc["moisture"]  = moisture;
-  doc["status"]    = status;
+  doc["device_id"]        = DEVICE_ID;
+  doc["raw_adc"]          = rawAdc;
+  doc["moisture"]         = moisture;
+  doc["status"]           = status;
+  doc["rssi"]             = rssi;
+  doc["firmware_version"] = FIRMWARE_VERSION;
 
   String body;
   serializeJson(doc, body);
 
   int code = http.POST(body);
   http.end();
-
   return (code == 201 || code == 200);
+}
+
+// ─── Device commands ──────────────────────────────────────────────────────────
+
+void checkCommands() {
+  if (WiFi.status() != WL_CONNECTED) return;
+
+  HTTPClient http;
+  String url = String(SUPABASE_URL)
+    + "/rest/v1/device_commands"
+    + "?device_id=eq." + DEVICE_ID
+    + "&executed_at=is.null"
+    + "&order=created_at.asc"
+    + "&limit=5"
+    + "&select=id,command";
+
+  http.begin(url);
+  http.addHeader("apikey", SUPABASE_KEY);
+  http.addHeader("Authorization", "Bearer " + String(SUPABASE_KEY));
+
+  int code = http.GET();
+  if (code != 200) { http.end(); return; }
+
+  String payload = http.getString();
+  http.end();
+
+  DynamicJsonDocument doc(1024);
+  if (deserializeJson(doc, payload) != DeserializationError::Ok) return;
+
+  for (JsonObject cmd : doc.as<JsonArray>()) {
+    String id      = cmd["id"].as<String>();
+    String command = cmd["command"].as<String>();
+
+    Serial.printf("[Command] Received: %s (id: %s)\n", command.c_str(), id.c_str());
+
+    // Mark executed before acting so we don't loop on failure
+    markCommandExecuted(id);
+
+    if (command == "reset_wifi") {
+      Serial.println("[Command] Resetting WiFi credentials and restarting...");
+      delay(500);
+      wifiManager.resetSettings();
+      memset(rtc_ssid, 0, sizeof(rtc_ssid));
+      memset(rtc_password, 0, sizeof(rtc_password));
+      delay(200);
+      ESP.restart();
+    }
+  }
+}
+
+void markCommandExecuted(String commandId) {
+  if (WiFi.status() != WL_CONNECTED) return;
+
+  HTTPClient http;
+  String url = String(SUPABASE_URL)
+    + "/rest/v1/device_commands"
+    + "?id=eq." + commandId;
+
+  http.begin(url);
+  http.addHeader("Content-Type", "application/json");
+  http.addHeader("apikey", SUPABASE_KEY);
+  http.addHeader("Authorization", "Bearer " + String(SUPABASE_KEY));
+  http.addHeader("Prefer", "return=minimal");
+
+  // Use PATCH to update executed_at
+  // ArduinoHttpClient doesn't have PATCH so we use sendRequest
+  String body = "{\"executed_at\":\"now()\"}";
+  int code = http.PATCH(body);
+  http.end();
+
+  Serial.printf("[Command] Marked executed (HTTP %d)\n", code);
 }
 
 // ─── Deep sleep helpers ───────────────────────────────────────────────────────
