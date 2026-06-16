@@ -271,6 +271,12 @@
   /* Plant type label in header */
   .header-plant-type{font-size:11px;font-family:var(--font-mono);color:var(--muted);margin-top:2px}
 
+  /* Plant avatar */
+  .plant-avatar{width:52px;height:52px;border-radius:50%;overflow:hidden;border:2px solid var(--border);background:var(--surface2);flex-shrink:0;cursor:pointer;transition:border-color 0.2s;display:flex;align-items:center;justify-content:center}
+  .plant-avatar:hover{border-color:var(--green)}
+  .plant-avatar img{width:100%;height:100%;object-fit:cover;display:block}
+  .plant-avatar-lg{width:72px;height:72px}
+
   /* Plant switcher */
   .plant-switcher{overflow-x:auto;scrollbar-width:none;padding:0 16px 12px;display:none;gap:10px;-webkit-overflow-scrolling:touch}
   .plant-switcher.show{display:flex}
@@ -436,14 +442,17 @@
 <div id="screen-dashboard" class="screen">
   <div class="app-wrap">
     <div class="header">
-      <div>
-        <div class="header-title">Moist</div>
-        <span class="plant-emoji" id="plant-emoji">🌿</span>
-        <div class="header-plant" id="active-plant-name">My Plant</div>
-        <div class="header-plant-type" id="active-plant-type"></div>
-        <div class="conn-indicator">
-          <div class="conn-dot" id="conn-dot"></div>
-          <span id="conn-label">Connecting...</span>
+      <div style="display:flex;align-items:center;gap:14px">
+        <div class="plant-avatar" id="plant-avatar" onclick="openSettings()" title="Plant settings"></div>
+        <div>
+          <div class="header-title">Moist</div>
+          <span class="plant-emoji" id="plant-emoji">🌿</span>
+          <div class="header-plant" id="active-plant-name">My Plant</div>
+          <div class="header-plant-type" id="active-plant-type"></div>
+          <div class="conn-indicator">
+            <div class="conn-dot" id="conn-dot"></div>
+            <span id="conn-label">Connecting...</span>
+          </div>
         </div>
       </div>
       <div class="header-btns">
@@ -740,6 +749,15 @@
     </button>
     <div class="auth-title" style="margin-bottom:6px">Settings</div>
     <div class="auth-sub" style="margin-bottom:24px" id="settings-device-label">Device settings</div>
+    <div class="calibrate-section" style="margin-bottom:12px">
+      <div class="calibrate-label">Plant photo</div>
+      <div style="display:flex;align-items:center;gap:16px;margin-bottom:14px">
+        <div class="plant-avatar plant-avatar-lg" id="settings-photo-preview"></div>
+        <div style="flex:1;font-size:13px;color:var(--muted);font-family:var(--font-mono);line-height:1.6">Tap to add a photo so you can recognise your plant at a glance.</div>
+      </div>
+      <label class="calibrate-btn" for="photo-file-input" style="display:block;text-align:center;cursor:pointer">📷 Choose photo</label>
+      <input type="file" id="photo-file-input" accept="image/*" style="display:none" onchange="handlePhotoSelect(this)">
+    </div>
     <div class="calibrate-section">
       <div class="calibrate-label">Data retention</div>
       <div style="font-size:13px;color:var(--muted);font-family:var(--font-mono);margin-bottom:14px;line-height:1.6">How long to keep readings. Older data is downsampled to one reading per hour to save space.</div>
@@ -911,6 +929,7 @@ async function loadDashboard(){
   document.getElementById('active-plant-name').textContent=activeDevice.plant_name||'My Plant';
   var preset=activeDevice.plant_type&&PLANT_PRESETS[activeDevice.plant_type];
   document.getElementById('active-plant-type').textContent=preset?preset.name:'';
+  updatePlantAvatar(activeDevice.photo_url||null);
   renderDeviceList();renderPlantSwitcher();updateCalibrationBanner();fetchLastWatered();
   // Show last known reading instantly while fresh fetch runs in background
   try{
@@ -973,6 +992,7 @@ function selectDevice(deviceId,plantName){
   var device=userDevices.find(function(d){return d.device_id===deviceId;});
   var preset=device&&device.plant_type&&PLANT_PRESETS[device.plant_type];
   document.getElementById('active-plant-type').textContent=preset?preset.name:'';
+  updatePlantAvatar(device&&device.photo_url||null);
   renderDeviceList();renderPlantSwitcher();fetchReadings();updateCalibrationBanner();fetchLastWatered();
 }
 
@@ -1414,6 +1434,9 @@ function openSettings(){
   document.getElementById('settings-device-label').textContent=device.plant_name||device.device_id;
   var sel=document.getElementById('retention-select');
   sel.value=String(device.retention_days||90);
+  // Populate photo preview in settings
+  var prev=document.getElementById('settings-photo-preview');
+  if(prev)prev.innerHTML=device.photo_url?'<img src="'+device.photo_url+'" alt="Plant">':FROG_SVG_AVATAR;
   showScreen('settings');
 }
 async function saveSettings(){
@@ -1582,6 +1605,72 @@ document.addEventListener('DOMContentLoaded',function(){
     }
   }
 })();
+
+// ── Plant photo ───────────────────────────────────────────────────────────────
+var FROG_SVG_AVATAR='<svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%">'
+  +'<circle cx="256" cy="256" r="256" fill="#E8FFF4"/>'
+  +'<circle cx="182" cy="178" r="66" fill="#00E676"/>'
+  +'<circle cx="330" cy="178" r="66" fill="#00E676"/>'
+  +'<circle cx="256" cy="306" r="172" fill="#00E676"/>'
+  +'<circle cx="182" cy="172" r="48" fill="#fff"/>'
+  +'<circle cx="330" cy="172" r="48" fill="#fff"/>'
+  +'<circle cx="188" cy="172" r="28" fill="#1a1a1a"/>'
+  +'<circle cx="324" cy="172" r="28" fill="#1a1a1a"/>'
+  +'<circle cx="196" cy="162" r="9" fill="#fff"/>'
+  +'<circle cx="332" cy="162" r="9" fill="#fff"/>'
+  +'<path d="M200 340 Q256 398 312 340" stroke="rgba(255,255,255,0.85)" stroke-width="13" stroke-linecap="round" fill="none"/>'
+  +'</svg>';
+
+function updatePlantAvatar(photoUrl){
+  ['plant-avatar','settings-photo-preview'].forEach(function(id){
+    var el=document.getElementById(id);
+    if(!el)return;
+    el.innerHTML=photoUrl?'<img src="'+photoUrl+'" alt="Plant">':FROG_SVG_AVATAR;
+  });
+}
+
+function compressImage(file,maxW,maxH,maxKB){
+  return new Promise(function(resolve){
+    var img=new Image();
+    var objUrl=URL.createObjectURL(file);
+    img.onload=function(){
+      URL.revokeObjectURL(objUrl);
+      var ratio=Math.min(maxW/img.width,maxH/img.height,1);
+      var canvas=document.createElement('canvas');
+      canvas.width=Math.round(img.width*ratio);
+      canvas.height=Math.round(img.height*ratio);
+      canvas.getContext('2d').drawImage(img,0,0,canvas.width,canvas.height);
+      var quality=0.85;
+      (function tryExport(){
+        canvas.toBlob(function(blob){
+          if(blob.size>maxKB*1024&&quality>0.3){quality-=0.1;tryExport();}
+          else{resolve(blob);}
+        },'image/jpeg',quality);
+      })();
+    };
+    img.src=objUrl;
+  });
+}
+
+async function handlePhotoSelect(input){
+  var file=input.files[0];
+  if(!file||!activeDeviceId)return;
+  input.value='';
+  showToast('Compressing…');
+  var blob=await compressImage(file,800,800,200);
+  showToast('Uploading…');
+  var path=currentUser.id+'/'+activeDeviceId+'.jpg';
+  var {error:upErr}=await sb.storage.from('plant-photos').upload(path,blob,{contentType:'image/jpeg',upsert:true});
+  if(upErr){showToast('Upload failed: '+upErr.message);return;}
+  var {data:urlData}=sb.storage.from('plant-photos').getPublicUrl(path);
+  var url=urlData.publicUrl+'?v='+Date.now();
+  var {error:dbErr}=await sb.from('devices').update({photo_url:url}).eq('device_id',activeDeviceId).eq('user_id',currentUser.id);
+  if(dbErr){showToast('Could not save URL: '+dbErr.message);return;}
+  var device=userDevices.find(function(d){return d.device_id===activeDeviceId;});
+  if(device)device.photo_url=url;
+  updatePlantAvatar(url);
+  showToast('Photo saved!',true);
+}
 
 // ── Calibration Wizard ────────────────────────────────────────────────────────
 var wizardDryAdc=null,wizardWetAdc=null,wizardCountdownTimer=null,wizardDeviceId=null;
